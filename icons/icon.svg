@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Mandioca">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0%" stop-color="#46e2a0"/>
+      <stop offset="60%" stop-color="#10a86a"/>
+      <stop offset="100%" stop-color="#0a8e5a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#g)"/>
+  <g stroke="#052015" fill="#052015">
+    <path d="M98 375 L213 260 L307 324 L411 141" fill="none" stroke-width="26"
+          stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+    <circle cx="98" cy="375" r="39"/>
+    <circle cx="213" cy="260" r="39"/>
+    <circle cx="307" cy="324" r="39"/>
+    <circle cx="411" cy="141" r="59"/>
+  </g>
+</svg>

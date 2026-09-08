@@ -1,0 +1,27 @@
+{
+  "name": "Mandioca",
+  "short_name": "Mandioca",
+  "description": "Panel financiero B2B con agente conversacional: órdenes, gastos y reportes.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a0c",
+  "theme_color": "#0a0a0c",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Agente", "url": "/#/agent" },
+    { "name": "Órdenes", "url": "/#/orders" },
+    { "name": "Gastos", "url": "/#/expenses" },
+    { "name": "Reportes", "url": "/#/reports" }
+  ]
+}

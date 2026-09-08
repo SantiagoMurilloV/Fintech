@@ -1,0 +1,128 @@
+/**
+ * Design tokens.
+ *
+ * Every colour, gradient, radius and spacing value the UI uses is declared
+ * here, so the whole look can be retuned from this single file.
+ */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg: #0a0a0c;
+  --glass: rgba(255, 255, 255, 0.045);
+  --panel: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --row-line: rgba(255, 255, 255, 0.05);
+  --hover: rgba(255, 255, 255, 0.04);
+  --hover-nav: rgba(255, 255, 255, 0.07);
+  --shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+  --glow-1: rgba(27, 181, 115, 0.18);
+  --glow-2: rgba(27, 181, 115, 0.09);
+
+  /* Text */
+  --text: #eef0f4;
+  --text-muted: #9aa0ab;
+  --text-faint: #6d727d;
+
+  /* Accent: flat colour, glossy gradient and its lighting shadow */
+  --accent: #12b877;
+  --accent-hover: #2ecd8d;
+  --on-accent: #052015;
+  --accent-grad: linear-gradient(165deg, rgba(70, 226, 160, 0.95) 0%, rgba(16, 168, 106, 0.92) 60%, rgba(10, 142, 90, 0.95) 100%);
+  --accent-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 10px 26px rgba(18, 184, 119, 0.28);
+
+  /* Active navigation item */
+  --nav-active-bg: rgba(18, 184, 119, 0.16);
+  --nav-active-fg: #eef0f4;
+
+  /* Status tones */
+  --success-bg: rgba(74, 194, 107, 0.14);
+  --success-fg: #6fd08c;
+  --warning-bg: rgba(217, 164, 65, 0.14);
+  --warning-fg: #dfb15e;
+  --danger-bg: rgba(224, 90, 79, 0.14);
+  --danger-fg: #e88a80;
+  --neutral-bg: rgba(155, 150, 138, 0.14);
+  --neutral-fg: #b5b0a2;
+
+  /* Solid elevated surface: notifications must read over any content. */
+  --surface-solid: #1b1e24;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #eef5f1;
+  --glass: linear-gradient(150deg, rgba(255, 255, 255, 0.82) 0%, rgba(240, 251, 246, 0.62) 100%);
+  --panel: linear-gradient(150deg, rgba(255, 255, 255, 0.9) 0%, rgba(232, 248, 241, 0.75) 100%);
+  --border: rgba(12, 90, 60, 0.14);
+  --border-strong: rgba(12, 90, 60, 0.24);
+  --row-line: rgba(12, 90, 60, 0.09);
+  --hover: rgba(255, 255, 255, 0.6);
+  --hover-nav: rgba(18, 184, 119, 0.1);
+  --shadow: 0 16px 40px rgba(12, 90, 60, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --glow-1: rgba(18, 184, 119, 0.24);
+  --glow-2: rgba(18, 184, 119, 0.13);
+
+  --text: #122019;
+  --text-muted: #4f6a5d;
+  --text-faint: #7d9488;
+
+  --accent: #0f9d63;
+  --accent-hover: #0b7d4f;
+  --on-accent: #ffffff;
+  --accent-grad: linear-gradient(165deg, #35cf90 0%, #10a96b 58%, #077a4c 100%);
+  --accent-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    0 12px 28px rgba(15, 157, 99, 0.32);
+
+  --nav-active-bg: linear-gradient(150deg, rgba(18, 184, 119, 0.22) 0%, rgba(18, 184, 119, 0.12) 100%);
+  --nav-active-fg: #0a5c3c;
+
+  --success-bg: rgba(31, 136, 61, 0.1);
+  --success-fg: #1f7a37;
+  --warning-bg: rgba(154, 103, 9, 0.12);
+  --warning-fg: #8a6110;
+  --danger-bg: rgba(190, 60, 50, 0.1);
+  --danger-fg: #b03a2e;
+  --neutral-bg: rgba(18, 120, 80, 0.11);
+  --neutral-fg: #3f6b58;
+
+  /* Solid elevated surface: notifications must read over any content. */
+  --surface-solid: #ffffff;
+}
+
+:root {
+  /* Typography */
+  --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 22px;
+  --space-6: 32px;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 18px;
+  --radius-pill: 999px;
+
+  /* Layout */
+  --sidebar-width: 232px;
+  --content-max: 1180px;
+  /* Breakpoint mirrored in hooks/useMediaQuery consumers. */
+  --mobile-breakpoint: 760px;
+}

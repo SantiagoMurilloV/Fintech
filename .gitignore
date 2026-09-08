@@ -1,0 +1,9 @@
+# Build output (scripts/build.mjs) and hosting metadata
+dist/
+.vercel/
+node_modules/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
