@@ -17,6 +17,12 @@ export function PencilIcon({ size = 14 } = {}) {
     h('path', { d: 'M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z' }));
 }
 
+/** Funnel: filters. */
+export function FilterIcon({ size = 14 } = {}) {
+  return h('svg', base(size),
+    h('path', { d: 'M22 4H2l8 9.5V19l4 2v-7.5L22 4z' }));
+}
+
 /** Pencil with sparks: the field is written for you (generated). */
 export function MagicPencilIcon({ size = 15 } = {}) {
   return h('svg', base(size),

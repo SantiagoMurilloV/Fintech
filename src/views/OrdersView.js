@@ -12,16 +12,14 @@ import { Button } from '../components/Button.js';
 import { DataTable, TablePager } from '../components/DataTable.js';
 import { EditableCell } from '../components/EditableCell.js';
 import { FilterBar } from '../components/FilterBar.js';
-import { FilterChips } from '../components/FilterChips.js';
 import { PageHeader } from '../components/PageHeader.js';
-
-const ALL = 'all';
 
 /** Milliseconds of quiet typing before a search hits the API. */
 const SEARCH_DELAY = 300;
 
 /** Spanish names for the base columns the backend may offer as filters. */
 const BASE_FACET_LABELS = {
+  status: 'Estado',
   currency: 'Moneda',
   gateway: 'Pasarela',
   customer: 'Cliente',
@@ -39,7 +37,6 @@ function sourceHeader(label, sourceField) {
 }
 
 export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
-  const [status, setStatus] = useState(ALL);
   const [offset, setOffset] = useState(0);
   // What the person is typing, and the settled text the API is asked for.
   const [typed, setTyped] = useState('');
@@ -56,15 +53,13 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
   }, [typed]);
 
   // Everything that selects rows, shared by the listing and the CSV export.
-  const query = {
-    status: status === ALL ? undefined : status,
-    q, filters, dateFrom, dateTo,
-  };
+  // Status is one more facet inside `filters`.
+  const query = { q, filters, dateFrom, dateTo };
   const filtersKey = JSON.stringify(filters);
 
   const { data, loading, error } = useAsync(
     () => api.listOrders({ ...query, limit: PAGE_SIZE, offset }),
-    [status, q, filtersKey, dateFrom, dateTo, offset, refreshKey],
+    [q, filtersKey, dateFrom, dateTo, offset, refreshKey],
   );
 
   const setFacet = (key, value) => {
@@ -76,8 +71,9 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
     setOffset(0);
   };
 
+  /** Clears what the dialog holds; the search box stays as typed. */
   const clearFilters = () => {
-    setTyped(''); setQ(''); setFilters({}); setDateFrom(''); setDateTo(''); setOffset(0);
+    setFilters({}); setDateFrom(''); setDateTo(''); setOffset(0);
   };
 
   /** Header for a facet: base columns have fixed names, feed columns their own. */
@@ -87,10 +83,8 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
     return columnLabel(column || { key: facet.key, label: facet.key });
   };
 
-  const filterOptions = useMemo(() => [
-    { value: ALL, label: 'Todas' },
-    ...(data?.statuses || []).map((code) => ({ value: code, label: statusLabel(code) })),
-  ], [data?.statuses]);
+  /** Option text for a facet value: status codes get their Spanish label. */
+  const facetValueLabel = (facet, value) => (facet.key === 'status' ? statusLabel(value) : value);
 
   const items = data?.items || [];
   const [rows, applyRow] = useRowEdits(items, data);
@@ -199,15 +193,10 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
       ],
     }),
 
-    h(FilterChips, {
-      options: filterOptions,
-      value: status,
-      onChange: (next) => { setStatus(next); setOffset(0); },
-    }),
-
     h(FilterBar, {
       search: typed, onSearch: setTyped,
-      facets: data?.facets || [], values: filters, onFacet: setFacet, labelFor: facetLabel,
+      facets: data?.facets || [], values: filters, onFacet: setFacet,
+      labelFor: facetLabel, valueLabel: facetValueLabel,
       dateFrom, dateTo,
       onDates: (from, to) => { setDateFrom(from); setDateTo(to); setOffset(0); },
       onClear: clearFilters,

@@ -1,24 +1,66 @@
 /**
- * Search box plus the filters the backend derived from the data.
+ * Search box plus a «Filtros» button that opens every other filter in a dialog.
  *
  * The backend decides which columns are worth filtering and which values
- * exist (with counts); this component only paints one select per facet, a
- * search input, a date range and a way to clear everything.
+ * exist (with counts); this component paints a search input, a button with
+ * the number of active filters, and a dialog with one select per facet and a
+ * date range. On a phone the dialog fills the screen.
  */
-import { h } from '../core/runtime.js';
+import { h, useState } from '../core/runtime.js';
+import { Button } from './Button.js';
+import { Field, Select, TextInput } from './Field.js';
+import { FilterIcon } from './icons.js';
+import { Modal } from './Modal.js';
 
 export function FilterBar({
   search, onSearch,
-  facets = [], values = {}, onFacet, labelFor,
+  facets = [], values = {}, onFacet, labelFor, valueLabel = (_facet, value) => value,
   dateFrom = '', dateTo = '', onDates,
   onClear,
 }) {
-  const anyActive = Boolean(search) || dateFrom || dateTo
-    || Object.values(values).some((value) => value);
+  const [open, setOpen] = useState(false);
+
+  const activeCount = Object.values(values).filter((value) => value).length
+    + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
+
+  const dialog = open && h(Modal, {
+    title: 'Filtros', className: 'modal--filters', onClose: () => setOpen(false),
+    footer: [
+      activeCount
+        ? h(Button, { key: 'clear', onClick: () => { onClear(); } }, 'Limpiar filtros')
+        : null,
+      h(Button, { key: 'done', variant: 'primary', onClick: () => setOpen(false) }, 'Listo'),
+    ],
+  },
+    facets.length === 0
+      ? h('p', { className: 'modal__lead' }, 'Los datos actuales no ofrecen columnas para filtrar.')
+      : null,
+    h('div', { className: 'filters-grid' },
+      facets.map((facet) => h(Field, { key: facet.key, label: labelFor(facet) },
+        h(Select, {
+          value: values[facet.key] || '',
+          onChange: (event) => onFacet(facet.key, event.target.value),
+          options: [
+            { value: '', label: 'Todos' },
+            ...facet.values.map((entry) => ({
+              value: entry.value,
+              label: `${valueLabel(facet, entry.value)} (${entry.count})`,
+            })),
+          ],
+        }))),
+      h(Field, { label: 'Desde' },
+        h(TextInput, {
+          type: 'date', value: dateFrom,
+          onInput: (event) => onDates(event.target.value, dateTo),
+        })),
+      h(Field, { label: 'Hasta' },
+        h(TextInput, {
+          type: 'date', value: dateTo,
+          onInput: (event) => onDates(dateFrom, event.target.value),
+        }))));
 
   return h('div', { className: 'filterbar' },
     h('label', { className: 'filterbar__search' },
-      h('span', { className: 'sr-only' }, 'Buscar'),
       h('input', {
         className: 'input',
         type: 'search',
@@ -27,40 +69,15 @@ export function FilterBar({
         onInput: (event) => onSearch(event.target.value),
         'aria-label': 'Buscar en cualquier campo',
       })),
-
-    facets.map((facet) => {
-      const current = values[facet.key] || '';
-      return h('label', { key: facet.key, className: 'facet' },
-        h('span', { className: 'facet__label' }, labelFor(facet)),
-        h('select', {
-          className: `input facet__select ${current ? 'is-active' : ''}`.trim(),
-          value: current,
-          onChange: (event) => onFacet(facet.key, event.target.value),
-        },
-          h('option', { value: '', selected: current === '' }, 'Todos'),
-          facet.values.map((entry) =>
-            h('option', {
-              key: entry.value, value: entry.value, selected: entry.value === current,
-            }, `${entry.value} (${entry.count})`))));
-    }),
-
-    h('label', { className: 'facet' },
-      h('span', { className: 'facet__label' }, 'Desde'),
-      h('input', {
-        className: `input facet__select ${dateFrom ? 'is-active' : ''}`.trim(),
-        type: 'date', value: dateFrom,
-        onChange: (event) => onDates(event.target.value, dateTo),
-      })),
-    h('label', { className: 'facet' },
-      h('span', { className: 'facet__label' }, 'Hasta'),
-      h('input', {
-        className: `input facet__select ${dateTo ? 'is-active' : ''}`.trim(),
-        type: 'date', value: dateTo,
-        onChange: (event) => onDates(dateFrom, event.target.value),
-      })),
-
-    anyActive
-      ? h('button', { className: 'chip filterbar__clear', onClick: onClear }, 'Limpiar filtros')
-      : null,
+    h(Button, {
+      className: `filterbar__toggle ${activeCount ? 'is-active' : ''}`.trim(),
+      onClick: () => setOpen(true),
+      'aria-haspopup': 'dialog',
+      'aria-expanded': open ? 'true' : 'false',
+    },
+      h(FilterIcon, { size: 15 }),
+      h('span', null, 'Filtros'),
+      activeCount ? h('span', { className: 'filterbar__count' }, String(activeCount)) : null),
+    dialog || null,
   );
 }
