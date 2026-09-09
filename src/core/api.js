@@ -138,6 +138,24 @@ async function request(path, { method = 'GET', body, headers = {}, retry = true 
 }
 
 /** Download a file through the API and trigger a browser save dialog. */
+/**
+ * Query string for the orders listing and its CSV export, so both always
+ * describe the same rows. `filters` is {column: value} and travels as JSON.
+ */
+export function orderQuery({ status, q, filters, dateFrom, dateTo, limit, offset } = {}) {
+  const params = new URLSearchParams();
+  if (status) params.set('status', status);
+  if (q) params.set('q', q);
+  const chosen = Object.fromEntries(
+    Object.entries(filters || {}).filter(([, value]) => value !== '' && value != null));
+  if (Object.keys(chosen).length) params.set('filters', JSON.stringify(chosen));
+  if (dateFrom) params.set('date_from', dateFrom);
+  if (dateTo) params.set('date_to', dateTo);
+  if (limit != null) params.set('limit', limit);
+  if (offset != null) params.set('offset', offset);
+  return params;
+}
+
 export async function download(path, filename) {
   const response = await fetch(`${API_BASE}${path}`, { headers: authHeaders() });
   if (!response.ok) throw new ApiError('No se pudo generar la descarga.', response.status);
@@ -180,13 +198,7 @@ export const api = {
   revokeUserSessions: (id) => request(`/api/users/${id}/sessions/revoke`, { method: 'POST' }),
   deleteUser: (id) => request(`/api/users/${id}`, { method: 'DELETE' }),
 
-  listOrders: ({ status, limit, offset } = {}) => {
-    const params = new URLSearchParams();
-    if (status) params.set('status', status);
-    if (limit != null) params.set('limit', limit);
-    if (offset != null) params.set('offset', offset);
-    return request(`/api/orders?${params}`);
-  },
+  listOrders: (query = {}) => request(`/api/orders?${orderQuery(query)}`),
   createOrder: (order) => request('/api/orders', { method: 'POST', body: order }),
   // Partial edit from the editable table: only the given fields are written.
   updateOrder: (id, changes) =>

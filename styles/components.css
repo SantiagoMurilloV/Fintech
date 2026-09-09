@@ -142,6 +142,60 @@
   color: var(--on-accent);
 }
 
+/* -------------------------------------------------------------- FilterBar */
+
+.filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: flex-end;
+}
+
+.filterbar__search {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+.filterbar__search .input {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.facet {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.facet__select {
+  width: auto;
+  max-width: 240px;
+  padding: 7px 10px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.facet__select.is-active {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.filterbar__clear { align-self: flex-end; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /* ------------------------------------------------------------- DataTable */
 
 .table {
@@ -166,6 +220,17 @@
   color: var(--text-faint);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+/* A base column fed by a sync shows the source field under its own name. */
+.th-sourced { display: inline-flex; flex-direction: column; gap: 2px; }
+.is-right .th-sourced { align-items: flex-end; }
+.th-source {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-muted);
 }
 
 .table__row {
