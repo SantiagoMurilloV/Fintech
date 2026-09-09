@@ -373,8 +373,18 @@ function PullReport({ pull, stored }) {
                 ? `\ncolumnas dinámicas: ${info.extra_columns.join(' | ')}`
                 : ''))
           : null,
-        (info.problems || []).map((problem) =>
-          h('p', { key: problem, className: 'probe__bad' }, problem)))));
+        // Criteria the sync applied on purpose: worth knowing, nothing to fix.
+        info.notes?.length
+          ? h('div', { className: 'probe__group' },
+              h('p', { className: 'probe__caption' }, 'Criterios aplicados'),
+              info.notes.map((note) => h('p', { key: note, className: 'probe__note' }, note)))
+          : null,
+        // What needs a person: a substitution, a gap in the totals, an unknown state.
+        info.problems?.length
+          ? h('div', { className: 'probe__group' },
+              h('p', { className: 'probe__caption probe__caption--bad' }, 'Requiere atención'),
+              info.problems.map((problem) => h('p', { key: problem, className: 'probe__bad' }, problem)))
+          : null)));
 }
 
 /** Lo que devolvió la prueba, en crudo pero legible. */
