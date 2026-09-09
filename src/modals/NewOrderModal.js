@@ -8,7 +8,7 @@ import { Field, FormError, Select, TextInput } from '../components/Field.js';
 import { Modal } from '../components/Modal.js';
 
 export function NewOrderModal({ catalogs, onClose, onSaved }) {
-  const currencies = catalogs?.currencies || ['COP', 'USD', 'MXN'];
+  const currencies = catalogs?.currencies || ['COP', 'USD', 'MXN', 'USDT', 'USDC'];
   const statuses = catalogs?.statuses || ['approved', 'pending', 'rejected', 'refunded'];
   const gateways = catalogs?.gateways || [];
 

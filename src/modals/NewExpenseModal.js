@@ -6,7 +6,7 @@ import { Button } from '../components/Button.js';
 import { Field, FormError, Select, TextInput } from '../components/Field.js';
 import { Modal } from '../components/Modal.js';
 
-const CURRENCIES = ['COP', 'USD', 'MXN'];
+const CURRENCIES = ['COP', 'USD', 'MXN', 'USDT', 'USDC'];
 
 export function NewExpenseModal({ onClose, onSaved }) {
   const [form, setForm] = useState({

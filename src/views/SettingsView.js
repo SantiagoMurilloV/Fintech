@@ -44,7 +44,7 @@ const SECTIONS = [
       },
       {
         key: 'api.default_currency', label: 'Moneda si el feed no trae una', kind: 'text',
-        placeholder: 'COP', hint: 'USD, COP o MXN',
+        placeholder: 'COP', hint: 'USD, COP, MXN, USDT o USDC',
       },
       {
         key: 'intake.orders_override', label: 'Mapeo manual de órdenes (JSON)', kind: 'text',
