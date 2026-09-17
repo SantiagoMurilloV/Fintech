@@ -2447,3 +2447,86 @@
 }
 
 .library__title-input:focus { outline: 1px solid var(--accent); }
+
+/* ---------------------------------------------------------- integrations
+   One row per external system: logo, name with its state, what it brings,
+   and the actions on the right. Connecting is OAuth, so the row carries a
+   single button instead of a token field; the app's own credentials fold
+   away underneath because they are set once and never touched again. */
+
+.integration {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+}
+
+.integration__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.integration__logo {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  background: #2ca01c;          /* QuickBooks green */
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+
+.integration__body { flex: 1; min-width: 0; }
+
+.integration__name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 14.5px;
+}
+
+.integration__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.integration__options {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.integration__advanced {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.integration__advanced > summary {
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.integration__advanced > summary:hover { color: var(--text); }
+.integration__advanced-hint { margin-top: var(--space-2); }
+.integration__redirect { margin-bottom: var(--space-3); user-select: all; }
+
+@media (max-width: 720px) {
+  .integration__row { flex-wrap: wrap; }
+  .integration__actions { width: 100%; justify-content: flex-start; }
+}
+
+/* Announced, not yet connectable: same row, dimmed logo, no actions. */
+.integration--preview .integration__logo { opacity: 0.55; }

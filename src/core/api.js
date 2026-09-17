@@ -279,5 +279,14 @@ export const api = {
   probeSheets: () => request('/api/settings/probe/sheets', { method: 'POST' }),
 
   integrationStatus: () => request('/api/integrations/status'),
+
+  // QuickBooks Online: el estado lo ve cualquiera; conectar, sincronizar y
+  // desconectar son del admin. `connect` devuelve la URL de Intuit a la que
+  // hay que llevar el navegador; la vuelta la recibe el backend.
+  quickbooksStatus: () => request('/api/integrations/quickbooks'),
+  quickbooksConnect: () => request('/api/integrations/quickbooks/connect', { method: 'POST' }),
+  quickbooksSync: () => request('/api/integrations/quickbooks/sync', { method: 'POST' }),
+  quickbooksDisconnect: () => request('/api/integrations/quickbooks/disconnect', { method: 'POST' }),
+
   health: () => request('/api/health'),
 };

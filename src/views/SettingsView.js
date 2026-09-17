@@ -1,9 +1,9 @@
 /**
  * Configuración del panel.
  *
- * Tres bloques: de dónde vienen los datos (endpoint), con qué hoja de cálculo
- * se sincroniza, y los interruptores que pausan cada dirección del sincronismo
- * por separado.
+ * Cuatro bloques: de dónde vienen los datos (endpoint), con qué hoja de cálculo
+ * se sincroniza, las integraciones que se conectan con un clic (QuickBooks) y
+ * los interruptores que pausan cada dirección del sincronismo por separado.
  *
  * Los dos botones de «Probar» son el punto: llaman al endpoint y a la hoja y
  * muestran qué trae cada uno — campos, columnas y una muestra — porque el
@@ -12,10 +12,31 @@
  */
 import { h, useEffect, useMemo, useState } from '../core/runtime.js';
 import { api } from '../core/api.js';
+import { QUICKBOOKS_AVAILABLE } from '../config.js';
 import { useAsync } from '../hooks/useAsync.js';
+import { Badge } from '../components/Badge.js';
 import { Button } from '../components/Button.js';
 import { Card } from '../components/Card.js';
 import { PageHeader } from '../components/PageHeader.js';
+
+/**
+ * Lo que trajo el navegador de vuelta de Intuit: el backend redirige a
+ * `/?quickbooks=connected|cancelled|error&…#/settings`. Se lee una vez y se
+ * limpia la URL para que recargar no repita el aviso.
+ */
+function takeOAuthOutcome() {
+  const url = new URL(window.location.href);
+  const outcome = url.searchParams.get('quickbooks');
+  if (!outcome) return null;
+  const detail = {
+    outcome,
+    company: url.searchParams.get('company') || '',
+    reason: url.searchParams.get('reason') || '',
+  };
+  for (const key of ['quickbooks', 'company', 'reason']) url.searchParams.delete(key);
+  window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  return detail;
+}
 
 /** Campos de cada bloque. `secret` no vuelve del servidor: se escribe o se deja. */
 const SECTIONS = [
@@ -216,7 +237,15 @@ export function SettingsView({ isAdmin, theme }) {
             label)))),
 
     data
-      ? SECTIONS.map((section) =>
+      ? SECTIONS.map((section) => [
+          // Integraciones va entre las fuentes y la sincronización: es una
+          // fuente más, pero se conecta con un clic en vez de con un token.
+          section.id === 'sync'
+            ? h(QuickBooksCard, {
+                key: 'integrations', isAdmin, values, set, dirty,
+                onSaved: reload,
+              })
+            : null,
           h(Card, { key: section.id, className: 'settings__section' },
             h('div', { className: 'settings__head' },
               h('div', null,
@@ -257,7 +286,8 @@ export function SettingsView({ isAdmin, theme }) {
                   pull,
                   stored: data?.last_pull,
                 })
-              : null))
+              : null),
+        ])
       : null,
 
     // Al final a propósito: lo destructivo no convive con lo cotidiano.
@@ -346,6 +376,238 @@ function SettingField({ field, value, configured, disabled, onChange }) {
       : null);
 }
 
+/** Campos de la tarjeta de QuickBooks; viajan por el mismo «Guardar» que el resto. */
+const QUICKBOOKS_OPTIONS = [
+  { key: 'quickbooks.enabled', label: 'Traer datos de QuickBooks en cada ciclo', kind: 'switch' },
+  { key: 'quickbooks.sync_expenses', label: 'Gastos (Purchase y Bill)', kind: 'switch' },
+  { key: 'quickbooks.sync_sales', label: 'Ventas (Invoice y SalesReceipt)', kind: 'switch' },
+  {
+    key: 'quickbooks.since', label: 'Traer transacciones desde', kind: 'text',
+    placeholder: 'AAAA-MM-DD', hint: 'Vacío = desde el 1 de enero de este año. Solo aplica a la primera carga.',
+  },
+];
+
+const QUICKBOOKS_CREDENTIALS = [
+  {
+    key: 'quickbooks.environment', label: 'Entorno', kind: 'select',
+    options: [['sandbox', 'Sandbox (empresa de prueba de Intuit)'], ['production', 'Producción']],
+    hint: 'Cada entorno tiene su propio par de llaves en developer.intuit.com.',
+  },
+  { key: 'quickbooks.client_id', label: 'Client ID', kind: 'text', placeholder: 'ABxyz…' },
+  { key: 'quickbooks.client_secret', label: 'Client Secret', kind: 'secret', placeholder: 'Secret' },
+];
+
+const QUICKBOOKS_STATE = {
+  connected: ['success', 'Conectada'],
+  needs_reconnect: ['warning', 'Requiere reconectar'],
+  disconnected: ['neutral', 'No conectada'],
+};
+
+/**
+ * Integraciones: por ahora, QuickBooks Online.
+ *
+ * La conexión es OAuth: «Conectar» lleva el navegador a Intuit, la persona
+ * autoriza con su propia cuenta y vuelve aquí ya conectada. Las credenciales
+ * de la app son de Mandioca, no del cliente, por eso viven plegadas abajo.
+ */
+function QuickBooksCard(props) {
+  // Mientras la app de Mandioca en Intuit no exista, la tarjeta solo anuncia.
+  if (!QUICKBOOKS_AVAILABLE) return h(QuickBooksPreview);
+  return h(QuickBooksLive, props);
+}
+
+function QuickBooksPreview() {
+  return h(Card, { className: 'settings__section' },
+    h('div', { className: 'settings__head' },
+      h('div', null,
+        h('h2', { className: 'settings__title' }, 'Integraciones'),
+        h('p', { className: 'settings__hint' },
+          'Sistemas externos que se conectarán con un clic. Lo que traigan entrará '
+          + 'como órdenes y gastos, igual que el endpoint o la hoja.'))),
+    h('div', { className: 'integration integration--preview' },
+      h('div', { className: 'integration__row' },
+        h('div', { className: 'integration__logo', 'aria-hidden': 'true' }, 'QB'),
+        h('div', { className: 'integration__body' },
+          h('div', { className: 'integration__name' },
+            h('span', null, 'QuickBooks Online'),
+            h(Badge, { tone: 'neutral' }, 'Próximamente')),
+          h('p', { className: 'settings__hint' },
+            'Traerá los gastos, facturas de proveedor, facturas de venta y recibos de su '
+            + 'contabilidad. Se autorizará en la pantalla de Intuit con la cuenta de '
+            + 'QuickBooks, sin pegar credenciales.')))));
+}
+
+function QuickBooksLive({ isAdmin, values, set, dirty, onSaved }) {
+  const { data: status, loading, error, reload } = useAsync(() => api.quickbooksStatus(), []);
+  const [busy, setBusy] = useState('');          // 'connect' | 'sync' | 'disconnect'
+  const [notice, setNotice] = useState(null);    // { tone, text }
+  const [pull, setPull] = useState(null);        // { running, report, problem }
+
+  // Aviso de la vuelta de Intuit, una sola vez.
+  useEffect(() => {
+    const outcome = takeOAuthOutcome();
+    if (!outcome) return;
+    if (outcome.outcome === 'connected') {
+      setNotice({ tone: 'ok', text: `QuickBooks quedó conectado${outcome.company ? ` a «${outcome.company}»` : ''}.` });
+    } else if (outcome.outcome === 'cancelled') {
+      setNotice({ tone: 'bad', text: 'La autorización se canceló en Intuit. No se conectó nada.' });
+    } else {
+      setNotice({ tone: 'bad', text: `No se pudo conectar: ${outcome.reason || 'error desconocido'}.` });
+    }
+  }, []);
+
+  const connect = async () => {
+    if (dirty) {
+      setNotice({ tone: 'bad', text: 'Guarde los cambios pendientes antes de conectar.' });
+      return;
+    }
+    setBusy('connect');
+    setNotice(null);
+    try {
+      const { url } = await api.quickbooksConnect();
+      window.location.assign(url);   // Intuit devuelve el navegador a esta pantalla
+    } catch (err) {
+      setNotice({ tone: 'bad', text: err.message });
+      setBusy('');
+    }
+  };
+
+  const sync = async () => {
+    setBusy('sync');
+    setPull({ running: true });
+    try {
+      const { report } = await api.quickbooksSync();
+      setPull({ report });
+      reload();
+      onSaved?.();
+    } catch (err) {
+      setPull({ problem: err.message });
+      reload();
+    } finally {
+      setBusy('');
+    }
+  };
+
+  const disconnect = async () => {
+    const question = '¿Desconectar QuickBooks? Se revoca el acceso en Intuit. Las órdenes y '
+      + 'gastos ya importados quedan en el panel.';
+    if (!window.confirm(question)) return;
+    setBusy('disconnect');
+    try {
+      await api.quickbooksDisconnect();
+      setNotice({ tone: 'ok', text: 'QuickBooks quedó desconectado.' });
+      setPull(null);
+      reload();
+    } catch (err) {
+      setNotice({ tone: 'bad', text: err.message });
+    } finally {
+      setBusy('');
+    }
+  };
+
+  const state = status?.status || 'disconnected';
+  const [tone, label] = QUICKBOOKS_STATE[state] || QUICKBOOKS_STATE.disconnected;
+  const connected = state === 'connected';
+  // Desde los settings y no desde el estado: así «Conectar» se habilita apenas
+  // se guardan las credenciales, sin esperar otra carga de la tarjeta.
+  const configured = Boolean(String(values['quickbooks.client_id'] || '').trim())
+    && Boolean(values['quickbooks.client_secret.configured'] || values['quickbooks.client_secret']);
+  const canConnect = isAdmin && configured;
+
+  return h(Card, { className: 'settings__section' },
+    h('div', { className: 'settings__head' },
+      h('div', null,
+        h('h2', { className: 'settings__title' }, 'Integraciones'),
+        h('p', { className: 'settings__hint' },
+          'Sistemas externos que se conectan con un clic. Lo que traen entra como '
+          + 'órdenes y gastos, igual que el endpoint o la hoja.'))),
+
+    error ? h('p', { className: 'form-error' }, error.message) : null,
+    notice
+      ? h('p', { className: notice.tone === 'ok' ? 'form-notice' : 'form-error' }, notice.text)
+      : null,
+
+    h('div', { className: 'integration' },
+      h('div', { className: 'integration__row' },
+        h('div', { className: 'integration__logo', 'aria-hidden': 'true' }, 'QB'),
+        h('div', { className: 'integration__body' },
+          h('div', { className: 'integration__name' },
+            h('span', null, 'QuickBooks Online'),
+            loading && !status ? null : h(Badge, { tone }, label)),
+          h('p', { className: 'settings__hint' },
+            connected
+              ? `Conectada a «${status.company_name || status.realm_id}»`
+                + (status.connected_environment === 'sandbox' ? ' · sandbox' : '')
+                + (status.home_currency ? ` · libros en ${status.home_currency}` : '')
+                + (status.connected_at ? ` · desde ${String(status.connected_at).slice(0, 10)}` : '')
+                + (status.last_sync_at
+                  ? ` · última sincronización ${String(status.last_sync_at).replace('T', ' ')}`
+                  : ' · todavía sin sincronizar')
+              : state === 'needs_reconnect'
+                ? `La conexión con «${status.company_name || status.realm_id}» dejó de funcionar`
+                  + (status.last_error ? `: ${status.last_error}` : '.')
+                  + ' Vuelva a autorizar para seguir trayendo datos.'
+                : 'Trae los gastos, facturas de proveedor, facturas de venta y recibos de su '
+                  + 'contabilidad. Se autoriza en la pantalla de Intuit con la cuenta de QuickBooks.'),
+          connected && status.last_error
+            ? h('p', { className: 'probe__bad' }, status.last_error)
+            : null),
+        h('div', { className: 'integration__actions' },
+          isAdmin && connected
+            ? h(Button, { onClick: sync, disabled: Boolean(busy) },
+                busy === 'sync' ? 'Sincronizando…' : 'Sincronizar ahora')
+            : null,
+          isAdmin && (connected || state === 'needs_reconnect')
+            ? h('button', {
+                className: 'btn btn--danger', disabled: Boolean(busy), onClick: disconnect,
+              }, busy === 'disconnect' ? 'Desconectando…' : 'Desconectar')
+            : null,
+          isAdmin && !connected
+            ? h(Button, {
+                variant: 'primary', onClick: connect,
+                disabled: !canConnect || Boolean(busy),
+                title: canConnect ? undefined : 'Primero cargue el Client ID y el Client Secret de la app.',
+              }, busy === 'connect' ? 'Abriendo Intuit…' : state === 'needs_reconnect' ? 'Reconectar' : 'Conectar')
+            : null)),
+
+      isAdmin
+        ? h('div', { className: 'settings__fields integration__options' },
+            QUICKBOOKS_OPTIONS.map((field) =>
+              h(SettingField, {
+                key: field.key, field,
+                value: values[field.key],
+                configured: values[`${field.key}.configured`],
+                disabled: !isAdmin,
+                onChange: (next) => set(field.key, next),
+              })))
+        : null,
+
+      // Credenciales de la app de Mandioca en Intuit. Plegadas: se cargan una
+      // vez (o por variables de entorno) y no se vuelven a tocar.
+      isAdmin
+        ? h('details', { className: 'integration__advanced', open: !configured },
+            h('summary', null,
+              configured
+                ? 'Credenciales de la app (avanzado)'
+                : 'Credenciales de la app · faltan para poder conectar'),
+            h('p', { className: 'settings__hint integration__advanced-hint' },
+              'Son las llaves de la app de Mandioca en developer.intuit.com, no las del '
+              + 'cliente. En esa app, la Redirect URI debe ser exactamente:'),
+            h('pre', { className: 'probe__code integration__redirect' }, status?.redirect_uri || '…'),
+            h('div', { className: 'settings__fields' },
+              QUICKBOOKS_CREDENTIALS.map((field) =>
+                h(SettingField, {
+                  key: field.key, field,
+                  value: values[field.key],
+                  configured: values[`${field.key}.configured`],
+                  disabled: !isAdmin,
+                  onChange: (next) => set(field.key, next),
+                }))))
+        : null,
+
+      h(PullReport, { pull, stored: status?.last_pull })));
+}
+
 /** Resultado de la última sincronización: qué entró, qué se omitió y por qué. */
 function PullReport({ pull, stored }) {
   if (pull?.running) return null;
@@ -357,7 +619,9 @@ function PullReport({ pull, stored }) {
 
   return h('div', { className: 'probe' },
     h('p', { className: 'probe__title' },
-      `Última sincronización: ${String(report.ran_at || '').replace('T', ' ')}`),
+      `Última sincronización: ${String(report.ran_at || '').replace('T', ' ')}`
+      // QuickBooks dice qué ventana cubrió: todo desde una fecha, o solo cambios.
+      + (report.window ? ` · ${report.window}` : '')),
     Object.entries(report.entities || {}).map(([entity, info]) =>
       h('div', { key: entity, className: 'probe__block' },
         h('p', { className: 'probe__meta' },

@@ -19,7 +19,17 @@ export const APP_NAME = 'Mandioca';
  * stale cached copy. Bump it together with `VERSION` in service-worker.js on
  * every frontend change.
  */
-export const APP_VERSION = 'v28';
+export const APP_VERSION = 'v29';
+
+/**
+ * QuickBooks Online in Configuración → Integraciones.
+ *
+ * false: the card reads «Próximamente» and offers no actions — the app is
+ * live with testers and Mandioca's Intuit app is not registered yet. true:
+ * the full card (Conectar, sync, credentials). The backend routes exist in
+ * both cases; the flag only decides what people see.
+ */
+export const QUICKBOOKS_AVAILABLE = false;
 
 /** Rows requested per page in paginated tables. */
 export const PAGE_SIZE = 25;
