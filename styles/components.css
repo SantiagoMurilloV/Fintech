@@ -2467,19 +2467,22 @@
   gap: var(--space-4);
 }
 
+/* Intuit's official logo, unaltered. Two PNGs from Intuit's brand guidelines:
+   the preferred one on light backgrounds, the reversed one on dark. Clear
+   space around it is half the symbol's height, as the guidelines ask. */
 .integration__logo {
   flex: none;
-  width: 42px;
+  display: flex;
+  align-items: center;
   height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radius-md);
-  background: #2ca01c;          /* QuickBooks green */
-  color: #fff;
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.02em;
+  padding: 0 6px;
 }
+
+.integration__logo-img { height: 30px; width: auto; display: block; }
+.integration__logo-img--dark { display: none; }
+
+:root[data-theme='dark'] .integration__logo-img--light { display: none; }
+:root[data-theme='dark'] .integration__logo-img--dark { display: block; }
 
 .integration__body { flex: 1; min-width: 0; }
 
@@ -2527,6 +2530,3 @@
   .integration__row { flex-wrap: wrap; }
   .integration__actions { width: 100%; justify-content: flex-start; }
 }
-
-/* Announced, not yet connectable: same row, dimmed logo, no actions. */
-.integration--preview .integration__logo { opacity: 0.55; }

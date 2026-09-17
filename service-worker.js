@@ -13,7 +13,7 @@
  *    and the API lives on a different origin anyway.
  */
 
-const VERSION = 'v29';
+const VERSION = 'v30';
 const SHELL_CACHE = `fintech-shell-${VERSION}`;
 
 // Assets that never depend on another file's version.
@@ -36,6 +36,8 @@ const SHELL_ASSETS = [
   '/src/core/pwa.js',
   '/src/components/blocks/BlockRenderer.js',
   '/icons/icon.svg',
+  '/icons/quickbooks-logo.png',
+  '/icons/quickbooks-logo-reversed.png',
 ];
 
 self.addEventListener('install', (event) => {

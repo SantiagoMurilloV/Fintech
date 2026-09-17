@@ -397,6 +397,24 @@ const QUICKBOOKS_CREDENTIALS = [
   { key: 'quickbooks.client_secret', label: 'Client Secret', kind: 'secret', placeholder: 'Secret' },
 ];
 
+/**
+ * Logo oficial de Intuit QuickBooks, sin alterar: el PNG «preferred» de las
+ * guías de marca de Intuit sobre fondo claro y el «reversed» sobre fondo
+ * oscuro (el CSS muestra uno u otro según data-theme). Intuit pide no
+ * modificar el logo y no abreviar la marca como «QB».
+ */
+function QuickBooksLogo() {
+  return h('div', { className: 'integration__logo' },
+    h('img', {
+      className: 'integration__logo-img integration__logo-img--light',
+      src: '/icons/quickbooks-logo.png', alt: 'Intuit QuickBooks', height: 30,
+    }),
+    h('img', {
+      className: 'integration__logo-img integration__logo-img--dark',
+      src: '/icons/quickbooks-logo-reversed.png', alt: '', 'aria-hidden': 'true', height: 30,
+    }));
+}
+
 const QUICKBOOKS_STATE = {
   connected: ['success', 'Conectada'],
   needs_reconnect: ['warning', 'Requiere reconectar'],
@@ -426,7 +444,7 @@ function QuickBooksPreview() {
           + 'como órdenes y gastos, igual que el endpoint o la hoja.'))),
     h('div', { className: 'integration integration--preview' },
       h('div', { className: 'integration__row' },
-        h('div', { className: 'integration__logo', 'aria-hidden': 'true' }, 'QB'),
+        h(QuickBooksLogo),
         h('div', { className: 'integration__body' },
           h('div', { className: 'integration__name' },
             h('span', null, 'QuickBooks Online'),
@@ -529,7 +547,7 @@ function QuickBooksLive({ isAdmin, values, set, dirty, onSaved }) {
 
     h('div', { className: 'integration' },
       h('div', { className: 'integration__row' },
-        h('div', { className: 'integration__logo', 'aria-hidden': 'true' }, 'QB'),
+        h(QuickBooksLogo),
         h('div', { className: 'integration__body' },
           h('div', { className: 'integration__name' },
             h('span', null, 'QuickBooks Online'),
