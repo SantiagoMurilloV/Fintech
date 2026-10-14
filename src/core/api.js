@@ -132,7 +132,15 @@ async function request(path, { method = 'GET', body, headers = {}, retry = true 
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new ApiError(payload.detail || payload.error || `Error ${response.status}`, response.status);
+    // A validation that found several reasons sends {message, problems}: the
+    // sentence becomes the error and the list travels with it.
+    const detail = payload.detail;
+    if (detail && typeof detail === 'object' && !Array.isArray(detail)) {
+      const error = new ApiError(detail.message || `Error ${response.status}`, response.status);
+      error.problems = detail.problems || [];
+      throw error;
+    }
+    throw new ApiError(detail || payload.error || `Error ${response.status}`, response.status);
   }
   return payload;
 }
@@ -277,6 +285,36 @@ export const api = {
   syncPull: () => request('/api/settings/sync/pull', { method: 'POST' }),
   clearData: (scope) => request('/api/settings/data/clear', { method: 'POST', body: { scope } }),
   probeSheets: () => request('/api/settings/probe/sheets', { method: 'POST' }),
+
+  // Plan de cuentas: la estructura la cambia el admin; las cifras, cualquiera.
+  getPlan: () => request('/api/plan'),
+  savePlan: (accounts) => request('/api/plan', { method: 'PUT', body: { accounts } }),
+  listPlanTemplates: () => request('/api/plan/templates'),
+  loadPlanTemplate: (template, replace = false) =>
+    request('/api/plan/template', { method: 'POST', body: { template, replace } }),
+  getPlanValues: (first, last) => {
+    const params = new URLSearchParams();
+    if (first) params.set('first', first);
+    if (last) params.set('last', last);
+    return request(`/api/plan/values?${params}`);
+  },
+  savePlanValues: (values) => request('/api/plan/values', { method: 'PUT', body: { values } }),
+  importPlanValues: (file, dryRun) => {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('dry_run', dryRun ? 'true' : 'false');
+    return request('/api/plan/values/import', { method: 'POST', body: form });
+  },
+
+  // Estado de resultados: cifras crudas; el formato lo pone lib/format.js.
+  getStatement: (period, compare) => {
+    const params = new URLSearchParams();
+    if (period) params.set('period', period);
+    if (compare) params.set('compare', compare);
+    return request(`/api/statement?${params}`);
+  },
+  saveStatementReport: (period, compare) =>
+    request('/api/statement/report', { method: 'POST', body: { period, compare } }),
 
   integrationStatus: () => request('/api/integrations/status'),
 

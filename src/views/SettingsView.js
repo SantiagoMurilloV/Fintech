@@ -13,6 +13,7 @@
 import { h, useEffect, useMemo, useState } from '../core/runtime.js';
 import { api } from '../core/api.js';
 import { QUICKBOOKS_AVAILABLE } from '../config.js';
+import { navigate } from '../core/router.js';
 import { useAsync } from '../hooks/useAsync.js';
 import { Badge } from '../components/Badge.js';
 import { Button } from '../components/Button.js';
@@ -236,6 +237,8 @@ export function SettingsView({ isAdmin, theme }) {
             h('span', { className: 'theme-option__icon', 'aria-hidden': 'true' }, icon),
             label)))),
 
+    h(PlanCard, { isAdmin }),
+
     data
       ? SECTIONS.map((section) => [
           // Integraciones va entre las fuentes y la sincronización: es una
@@ -428,6 +431,82 @@ const QUICKBOOKS_STATE = {
  * autoriza con su propia cuenta y vuelve aquí ya conectada. Las credenciales
  * de la app son de Mandioca, no del cliente, por eso viven plegadas abajo.
  */
+/**
+ * Plan de cuentas: las cajas donde se ordena la plata de la empresa y las
+ * recetas de sus totales. Se parte de una plantilla (archivos en el backend,
+ * app/plans/) y se ajusta en su propia pantalla.
+ */
+function PlanCard({ isAdmin }) {
+  const plan = useAsync(() => api.getPlan(), []);
+  const templates = useAsync(() => api.listPlanTemplates(), []);
+  const [chosen, setChosen] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState(null);       // { tone, text }
+
+  const items = templates.data?.items || [];
+  const selected = chosen || items[0]?.id || '';
+  const count = plan.data?.accounts.length || 0;
+
+  const load = async () => {
+    const template = items.find((item) => item.id === selected);
+    if (!template) return;
+    const replace = count > 0;
+    if (replace && !window.confirm(
+      `¿Reemplazar el plan actual (${count} cuentas) por «${template.name}»? `
+      + 'Las cifras de las cuentas que no existan en la plantilla se borran.')) return;
+    setBusy(true);
+    setNotice(null);
+    try {
+      const result = await api.loadPlanTemplate(selected, replace);
+      setNotice({ tone: 'ok', text: `Plan «${template.name}» cargado: ${result.accounts.length} cuentas.` });
+      plan.reload();
+    } catch (err) {
+      setNotice({ tone: 'bad', text: err.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return h(Card, { className: 'settings__section' },
+    h('div', { className: 'settings__head' },
+      h('div', null,
+        h('h2', { className: 'settings__title' }, 'Plan de cuentas'),
+        h('p', { className: 'settings__hint' },
+          'Las cajas donde la empresa ordena su plata (ventas, nómina, arriendo…) y cómo se '
+          + 'calculan los totales. Con él se arma el estado de resultados de cada mes.')),
+      h('div', { className: 'settings__actions' },
+        count ? h(Button, { onClick: () => navigate('statement') }, 'Ver estado') : null,
+        h(Button, { variant: count ? 'ghost' : 'subtle', onClick: () => navigate('plan') },
+          isAdmin ? 'Editar plan' : 'Ver plan'))),
+
+    plan.error ? h('p', { className: 'form-error' }, plan.error.message) : null,
+    notice ? h('p', { className: notice.tone === 'ok' ? 'form-notice' : 'form-error' }, notice.text) : null,
+
+    h('p', { className: 'settings__hint' },
+      plan.loading && !plan.data
+        ? 'Cargando…'
+        : count
+          ? `${count} cuentas · ${plan.data.inputs} se llenan con cifras · ${plan.data.totals} totales calculados.`
+          : 'Todavía no hay plan. Elija una plantilla para empezar; después se ajusta en pantalla.'),
+
+    isAdmin && items.length
+      ? h('div', { className: 'settings__fields plan-template' },
+          h('label', { className: 'field' },
+            h('span', null, count ? 'Reemplazar por una plantilla' : 'Plantilla'),
+            h('select', {
+              className: 'input', value: selected,
+              onChange: (event) => setChosen(event.target.value),
+            }, items.map((item) => h('option', {
+              key: item.id, value: item.id, selected: item.id === selected,
+            }, `${item.name} · ${item.accounts} cuentas`))),
+            h('small', { className: 'field__hint' },
+              items.find((item) => item.id === selected)?.description || '')),
+          h('div', { className: 'plan-template__action' },
+            h(Button, { variant: count ? 'ghost' : 'primary', disabled: busy, onClick: load },
+              busy ? 'Cargando…' : 'Cargar plantilla')))
+      : null);
+}
+
 function QuickBooksCard(props) {
   // Mientras la app de Mandioca en Intuit no exista, la tarjeta solo anuncia.
   if (!QUICKBOOKS_AVAILABLE) return h(QuickBooksPreview);

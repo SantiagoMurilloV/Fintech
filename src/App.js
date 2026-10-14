@@ -27,9 +27,12 @@ import { OrdersView } from './views/OrdersView.js';
 import { ExpensesView } from './views/ExpensesView.js';
 import { ReportsView } from './views/ReportsView.js';
 import { LibraryView } from './views/LibraryView.js';
+import { StatementView } from './views/StatementView.js';
+import { PlanView } from './views/PlanView.js';
 import { NewOrderModal } from './modals/NewOrderModal.js';
 import { NewExpenseModal } from './modals/NewExpenseModal.js';
 import { ImportModal } from './modals/ImportModal.js';
+import { StatementImportModal } from './modals/StatementImportModal.js';
 
 export function App() {
   const auth = useAuth();
@@ -118,6 +121,8 @@ export function App() {
     expenses: () => h(ExpensesView, { onOpenModal: open, refreshKey, onChanged: refresh }),
     reports: () => h(ReportsView, { refreshKey }),
     library: () => h(LibraryView, { refreshKey }),
+    statement: () => h(StatementView, { refreshKey, onOpenModal: open, isAdmin: auth.isAdmin }),
+    plan: () => h(PlanView, { isAdmin: auth.isAdmin }),
     // Guarded here too: the entry is hidden for members, and so is the view.
     settings: () => h(SettingsView, { isAdmin: auth.isAdmin, theme }),
     users: () => (auth.isAdmin
@@ -135,6 +140,7 @@ export function App() {
       onClose: close,
       onSaved: () => { close(); refresh(); },
     }),
+    'statement-import': () => h(StatementImportModal, { onClose: close, onImported: refresh }),
     import: () => h(ImportModal, {
       kind: modal.payload.kind,
       onClose: close,

@@ -34,6 +34,7 @@ export const NAV_ITEMS = [
   { id: 'orders', label: 'Órdenes', icon: '⇄' },
   { id: 'expenses', label: 'Gastos', icon: '▤' },
   { id: 'reports', label: 'Análisis', icon: '◔' },
+  { id: 'statement', label: 'Resultados', icon: '≡' },
   { id: 'library', label: 'Reportes', icon: '▦' },
   // Only shown to administrators (see Sidebar).
   { id: 'users', label: 'Usuarios', icon: '◍', adminOnly: true },
@@ -54,6 +55,8 @@ export const VIEW_LABELS = {
   expenses: 'Gastos',
   reports: 'Análisis',
   library: 'Reportes',
+  statement: 'Estado de resultados',
+  plan: 'Plan de cuentas',
   users: 'Usuarios',
   settings: 'Configuración',
 };
@@ -67,6 +70,8 @@ export const VIEW_SUGGESTIONS = {
   expenses: ['¿Qué gastos no tienen comprobante?', 'Registra un gasto'],
   reports: ['¿Hay alertas o anomalías?', 'Genera el reporte financiero en PDF'],
   library: ['¿Qué reportes tengo guardados?', 'Grafica los ingresos por semana'],
+  statement: ['¿Cómo cerró el mes?', '¿Hay alertas o anomalías?'],
+  plan: ['¿Cómo cerró el mes?', '¿Hay alertas o anomalías?'],
   users: ['¿Cómo cerró el mes?', '¿Hay alertas o anomalías?'],
   agent: ['¿Cómo cerró el mes?', '¿Hay alertas o anomalías?'],
 };

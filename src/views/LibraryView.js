@@ -18,6 +18,7 @@ const KIND_LABELS = {
   chart: 'Gráfico',
   financial: 'Reporte financiero',
   analysis: 'Análisis',
+  statement: 'Estado de resultados',
   invoice: 'Factura',
   receipt: 'Comprobante',
 };
@@ -27,6 +28,7 @@ const FILTERS = [
   { value: 'chart', label: 'Gráficos' },
   { value: 'financial', label: 'Financieros' },
   { value: 'analysis', label: 'Análisis' },
+  { value: 'statement', label: 'Estados de resultados' },
   { value: 'invoice', label: 'Facturas' },
   { value: 'receipt', label: 'Comprobantes' },
 ];

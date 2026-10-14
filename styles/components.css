@@ -2530,3 +2530,127 @@
   .integration__row { flex-wrap: wrap; }
   .integration__actions { width: 100%; justify-content: flex-start; }
 }
+
+/* ---------------------------------------------- plan de cuentas + estado
+   The statement reads like the finance team's own sheet: totals in bold,
+   lines indented under the account they belong to, figures in tabular
+   numerals, variation green when the line improved and red when it got worse
+   (a cost going up is red). */
+
+.modal--wide { width: 780px; }
+
+.settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.plan-template { margin-top: var(--space-3); align-items: end; }
+.plan-template__action { display: flex; align-items: flex-start; padding-top: 22px; }
+
+.statement-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  align-items: flex-end;
+  margin-bottom: var(--space-4);
+}
+.statement-controls .field { min-width: 190px; }
+
+.statement { margin-top: var(--space-4); font-variant-numeric: tabular-nums; }
+.statement .table__row { padding-block: 9px; }
+.statement__name { display: flex; align-items: baseline; gap: 2px; }
+.statement__row--total { font-weight: 500; }
+.statement__row--total.is-root { font-weight: 650; background: var(--hover); }
+.statement__row--group {
+  color: var(--text-faint);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.statement__flag { color: var(--warning-fg); font-weight: 600; }
+.statement__share,
+.statement__previous { color: var(--text-muted); }
+.is-good { color: var(--success-fg); }
+.is-bad { color: var(--danger-fg); }
+
+.statement-values { margin-top: 32px; display: grid; gap: 6px; }
+.statement-values .statement { margin-top: var(--space-2); }
+.statement-values .cell--button { width: 100%; justify-content: flex-end; }
+
+.statement-empty {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding: 22px;
+}
+
+.plan { margin-top: var(--space-3); }
+.plan .table__head,
+.plan .table__row { min-width: 900px; }
+.plan__grid { grid-template-columns: minmax(250px, 2fr) 130px minmax(240px, 2.4fr) 220px; }
+.plan__name { display: flex; flex-direction: column; gap: 3px; }
+.plan__key { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-faint); }
+.plan__input { padding: 6px 9px; font-size: 13px; }
+.plan__formula { font-family: var(--font-mono); font-size: 12px; }
+.plan__row--total .plan__input:first-child,
+.plan__row--group .plan__input:first-child { font-weight: 600; }
+.plan__actions { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
+.plan__icon {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.plan__icon:hover { border-color: var(--accent); color: var(--text); }
+.plan__icon.is-bad:hover { border-color: var(--danger-fg); color: var(--danger-fg); }
+.plan__details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3) var(--space-4);
+  min-width: 900px;
+  padding: 14px 18px 18px;
+  border-bottom: 1px solid var(--row-line);
+  background: var(--hover);
+}
+.plan__definition { grid-column: 1 / -1; }
+.plan-problems ul { margin: 6px 0 0 18px; display: grid; gap: 3px; }
+
+.import-report { display: grid; gap: var(--space-3); margin-top: var(--space-3); }
+.import-report__sheets { font-size: 12px; }
+.import-report__block h3 { font-size: 13px; margin-bottom: 4px; }
+.import-report__table {
+  display: grid;
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  font-size: 12.5px;
+}
+.import-report__row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--row-line);
+  font-variant-numeric: tabular-nums;
+}
+.import-report__row:last-child { border-bottom: none; }
+.import-report__row.is-head {
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.import-report__list { margin-left: 18px; display: grid; gap: 4px; font-size: 12.5px; }
+
+@media (max-width: 720px) {
+  .plan-template__action { padding-top: 0; }
+  .import-report__row { grid-template-columns: 1.4fr 1fr 1fr; }
+  .import-report__row > :nth-child(2),
+  .import-report__row > :nth-child(4) { display: none; }
+}

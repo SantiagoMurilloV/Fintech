@@ -20,8 +20,8 @@ src/
 ├── main.js · App.js · config.js
 ├── core/        runtime.js (vDOM + hooks) · api.js · router.js · pwa.js
 ├── components/  DataTable · EditableCell · Badge · Sidebar · AgentDock · blocks/ …
-├── views/       Agent · Orders · Expenses · Reports · Library · Users · Settings · Login
-├── modals/      NewOrder · NewExpense · Import
+├── views/       Agent · Orders · Expenses · Reports · Statement · Plan · Library · Users · Settings · Login
+├── modals/      NewOrder · NewExpense · Import · StatementImport
 ├── hooks/       useAsync · useAuth · useChat · useRowEdits …
 └── lib/         format.js (formatting) · labels.js (UI texts) · columns.js (dynamic columns)
 ```
