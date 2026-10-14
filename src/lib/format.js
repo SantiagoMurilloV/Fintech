@@ -93,6 +93,22 @@ export function dateTimeLabel(iso) {
   return time ? `${dateLabel(iso)}, ${time}` : dateLabel(iso);
 }
 
+/**
+ * A statement line in its unit: money "1.234,56", basis points "17,0 pb",
+ * percentages "44,7%". `signed` prefixes a "+" for variations.
+ */
+export function figure(value, unit = 'usd', { signed = false } = {}) {
+  if (value == null) return '—';
+  const sign = signed && value > 0 ? '+' : '';
+  if (unit === 'bps') {
+    return `${sign}${new Intl.NumberFormat(LOCALE, {
+      minimumFractionDigits: 1, maximumFractionDigits: 1,
+    }).format(value)} pb`;
+  }
+  if (unit === 'pct') return `${sign}${percent(value)}`;
+  return `${sign}${amount(value, 'USD')}`;
+}
+
 /** "YYYY-MM" -> "Julio 2026". */
 export function periodName(period) {
   if (!period) return '';
