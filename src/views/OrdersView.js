@@ -1,4 +1,7 @@
-/** Orders table with search, data-driven filters, pagination and exports. */
+/**
+ * Orders table: search, period chips, status chips, more filters, sortable
+ * columns, a pager that jumps, and a running total of what is selected.
+ */
 import { h, useEffect, useMemo, useState } from '../core/runtime.js';
 import { PAGE_SIZE } from '../config.js';
 import { api, download, orderQuery } from '../core/api.js';
@@ -13,6 +16,7 @@ import { DataTable, TablePager } from '../components/DataTable.js';
 import { EditableCell } from '../components/EditableCell.js';
 import { FilterBar } from '../components/FilterBar.js';
 import { PageHeader } from '../components/PageHeader.js';
+import { PERIOD_PRESETS, presetRange, rangeProblem } from '../lib/periods.js';
 
 /** Milliseconds of quiet typing before a search hits the API. */
 const SEARCH_DELAY = 300;
@@ -36,14 +40,47 @@ function sourceHeader(label, sourceField) {
     h('span', { className: 'th-source mono' }, sourceField));
 }
 
+/** Rows-per-page choices; the API serves at most 200 at a time. */
+const PAGE_SIZES = [25, 50, 100, 200];
+
+/** Where this screen remembers the viewer's page size, period and order. */
+const PREFS_KEY = 'fa.orders.view';
+
+/**
+ * The viewer's last choices. A preset is stored by name and its dates are
+ * recomputed, so «Este mes» saved in May still means this month in June.
+ * Storage may be missing (private window); the screen then starts fresh.
+ */
+function loadPrefs() {
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(PREFS_KEY) || '{}') || {}; } catch { saved = {}; }
+  const pageSize = PAGE_SIZES.includes(saved.pageSize) ? saved.pageSize : PAGE_SIZE;
+  const sort = typeof saved.sort === 'string' ? saved.sort : 'date_desc';
+  let period = PERIOD_PRESETS.some((item) => item.key === saved.period) ? saved.period : 'all';
+  let { from, to } = presetRange(period);
+  if (period === 'range') {
+    if (rangeProblem(saved.from, saved.to)) period = 'all';
+    else ({ from, to } = saved);
+  }
+  return { pageSize, sort, period, from: from || '', to: to || '' };
+}
+
+function savePrefs(prefs) {
+  try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch { /* not kept; harmless */ }
+}
+
 export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
+  const prefs = useMemo(loadPrefs, []);
   const [offset, setOffset] = useState(0);
+  const [pageSize, setPageSize] = useState(prefs.pageSize);
+  const [sort, setSort] = useState(prefs.sort);
   // What the person is typing, and the settled text the API is asked for.
   const [typed, setTyped] = useState('');
   const [q, setQ] = useState('');
   const [filters, setFilters] = useState({});
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [period, setPeriod] = useState(prefs.period);
+  const [dateFrom, setDateFrom] = useState(prefs.from);
+  const [dateTo, setDateTo] = useState(prefs.to);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -52,15 +89,29 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
     return () => clearTimeout(timer);
   }, [typed]);
 
+  useEffect(() => {
+    savePrefs({ pageSize, sort, period, from: dateFrom, to: dateTo });
+  }, [pageSize, sort, period, dateFrom, dateTo]);
+
   // Everything that selects rows, shared by the listing and the CSV export.
   // Status is one more facet inside `filters`.
-  const query = { q, filters, dateFrom, dateTo };
+  const query = { q, filters, dateFrom, dateTo, sort };
   const filtersKey = JSON.stringify(filters);
 
   const { data, loading, error } = useAsync(
-    () => api.listOrders({ ...query, limit: PAGE_SIZE, offset }),
-    [q, filtersKey, dateFrom, dateTo, offset, refreshKey],
+    () => api.listOrders({ ...query, limit: pageSize, offset }),
+    [q, filtersKey, dateFrom, dateTo, sort, pageSize, offset, refreshKey],
   );
+
+  // An unknown sort saved by an older version is refused by the API: fall
+  // back to newest first instead of showing an error forever.
+  useEffect(() => {
+    if (error && sort !== 'date_desc' && /sort/.test(error.message || '')) setSort('date_desc');
+  }, [error]);
+
+  const choosePeriod = (key, from, to) => {
+    setPeriod(key); setDateFrom(from); setDateTo(to); setOffset(0);
+  };
 
   const setFacet = (key, value) => {
     setFilters((current) => {
@@ -71,9 +122,10 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
     setOffset(0);
   };
 
-  /** Clears what the dialog holds; the search box stays as typed. */
+  /** Clears every filter, the search and the period: back to all orders. */
   const clearFilters = () => {
-    setFilters({}); setDateFrom(''); setDateTo(''); setOffset(0);
+    setFilters({}); setTyped(''); setQ('');
+    setPeriod('all'); setDateFrom(''); setDateTo(''); setOffset(0);
   };
 
   /** Header for a facet: base columns have fixed names, feed columns their own. */
@@ -111,6 +163,7 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
     { key: 'id', header: sourceHeader('ID orden', source.external_id), width: '110px', render: (o) => h('span', { className: 'mono' }, o.id) },
     {
       key: 'customer', header: sourceHeader('Cliente', source.customer), width: '1.6fr',
+      sort: 'customer', sortFirst: 'asc',
       render: (o) => h(EditableCell, {
         value: o.customer,
         display: h('span', { className: 'strong' }, o.customer),
@@ -119,6 +172,7 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
     },
     {
       key: 'amount', header: sourceHeader('Monto', source.amount), width: '1.2fr', align: 'right',
+      sort: 'amount',
       render: (o) => h(EditableCell, {
         value: o.amount, type: 'number', align: 'right',
         display: h('span', { className: 'num' },
@@ -129,6 +183,7 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
     },
     {
       key: 'status', header: sourceHeader('Estado', source.status), width: 'minmax(150px, 1.4fr)',
+      sort: 'status', sortFirst: 'asc',
       render: (o) => h(EditableCell, {
         value: o.status, type: 'select',
         options: (data?.statuses || []).map((code) => ({ value: code, label: statusLabel(code) })),
@@ -153,6 +208,7 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
     },
     {
       key: 'date', header: sourceHeader('Fecha', source.date), width: '120px', align: 'right',
+      sort: 'date',
       render: (o) => h(EditableCell, {
         value: o.date, type: 'date', align: 'right',
         display: h('span', { className: 'muted' }, fmt.shortDate(o.date)),
@@ -179,6 +235,9 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
 
 
   const total = data?.total || 0;
+  const pages = Math.max(Math.ceil(total / pageSize), 1);
+  const page = Math.min(Math.floor(offset / pageSize) + 1, pages);
+  const goTo = (target) => setOffset((Math.min(Math.max(target, 1), pages) - 1) * pageSize);
 
   const wide = (data?.columns?.length || 0) > 2;
 
@@ -197,9 +256,10 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
       search: typed, onSearch: setTyped,
       facets: data?.facets || [], values: filters, onFacet: setFacet,
       labelFor: facetLabel, valueLabel: facetValueLabel,
-      dateFrom, dateTo,
-      onDates: (from, to) => { setDateFrom(from); setDateTo(to); setOffset(0); },
+      quickFacet: 'status',
+      period, dateFrom, dateTo, onPeriod: choosePeriod,
       onClear: clearFilters,
+      summary: data ? h(SelectionSummary, { summary: data.summary }) : null,
     }),
 
     error
@@ -207,16 +267,52 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
       : h(DataTable, {
           columns,
           rows,
+          sort,
+          onSort: (next) => { setSort(next); setOffset(0); },
           minWidth: `${920 + (data?.columns?.length || 0) * 140}px`,
           rowKey: (o) => o.id,
           loading,
-          empty: data?.filtered ? 'Ninguna orden coincide con la búsqueda.' : 'No hay órdenes con este filtro.',
-          footer: h(TablePager, {
-            summary: `Mostrando ${rows.length} de ${fmt.integer(total)} órdenes${data?.filtered ? ' que coinciden' : ''}`,
+          empty: data?.filtered ? 'Ninguna orden coincide con estos filtros.' : 'No hay órdenes todavía.',
+          footer: total ? h(TablePager, {
+            summary: `${fmt.integer(offset + 1)}–${fmt.integer(offset + rows.length)} de ${fmt.integer(total)} órdenes`,
             canPrev: offset > 0,
             canNext: offset + rows.length < total,
-            onPrev: () => setOffset(Math.max(offset - PAGE_SIZE, 0)),
-            onNext: () => setOffset(offset + PAGE_SIZE),
-          }),
+            onPrev: () => setOffset(Math.max(offset - pageSize, 0)),
+            onNext: () => setOffset(offset + pageSize),
+            page, pages, onPage: goTo,
+            pageSize, pageSizes: PAGE_SIZES,
+            onPageSize: (size) => {
+              // Keep the first row on screen in view after the change.
+              setPageSize(size); setOffset(Math.floor(offset / size) * size);
+            },
+          }) : null,
         }));
+}
+
+/**
+ * What the filters select, all pages together: how many orders, their USD
+ * value and the dates they span. Orders in a currency without a rate are
+ * counted but not valued, and the line says so.
+ */
+function SelectionSummary({ summary }) {
+  if (!summary) return null;
+  const parts = [
+    h('strong', { key: 'n' }, `${fmt.integer(summary.count)} ${summary.count === 1 ? 'orden' : 'órdenes'}`),
+  ];
+  if (summary.count) {
+    parts.push(h('span', { key: 'usd' }, fmt.usdCompact(summary.usd)));
+    if (summary.first_date) {
+      parts.push(h('span', { key: 'dates', className: 'muted' },
+        summary.first_date === summary.last_date
+          ? fmt.dateLabel(summary.first_date)
+          : `${fmt.dateLabel(summary.first_date)} – ${fmt.dateLabel(summary.last_date)}`));
+    }
+    if (summary.unrated) {
+      parts.push(h('span', {
+        key: 'unrated', className: 'muted',
+        title: 'Su moneda no tiene tasa configurada; no se suman en USD.',
+      }, `${fmt.integer(summary.unrated)} sin tasa USD`));
+    }
+  }
+  return h('span', { className: 'selection-summary' }, parts);
 }

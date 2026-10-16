@@ -19,7 +19,7 @@ export const APP_NAME = 'Mandioca';
  * stale cached copy. Bump it together with `VERSION` in service-worker.js on
  * every frontend change.
  */
-export const APP_VERSION = 'v31';
+export const APP_VERSION = 'v32';
 
 /**
  * QuickBooks Online in Configuración → Integraciones.
