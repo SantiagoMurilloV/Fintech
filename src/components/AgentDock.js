@@ -40,13 +40,13 @@ export function AgentDock({ chat, view, email, onClose, onExpand, onNewConversat
     chat.send(content, { view });
   };
 
-  return h('section', { className: 'dock', role: 'dialog', 'aria-label': 'Agente' },
+  return h('section', { className: 'dock', role: 'dialog', 'aria-label': 'Chat' },
     h('header', { className: 'dock__head' },
       h('span', { className: 'dock__mark', 'aria-hidden': 'true' },
         h(LogoMark, { size: 15, strokeWidth: 1.8 })),
-      h('span', { className: 'dock__title' }, 'Agente'),
+      h('span', { className: 'dock__title' }, 'Chat'),
       // Makes the context the agent receives visible to the user.
-      h('span', { className: 'dock__context', title: 'Contexto que recibe el agente' },
+      h('span', { className: 'dock__context', title: 'Contexto que recibe el chat' },
         `Viendo: ${viewLabel}`),
       h('button', {
         className: 'dock__icon-btn', onClick: onNewConversation,
@@ -112,7 +112,7 @@ export function AgentDock({ chat, view, email, onClose, onExpand, onNewConversat
         value: draft,
         placeholder: `Pregunta sobre ${viewLabel.toLowerCase()}…`,
         autocomplete: 'off',
-        'aria-label': 'Mensaje para el agente',
+        'aria-label': 'Escriba su mensaje',
         onInput: (event) => setDraft(event.target.value),
         onKeyDown: (event) => { if (event.key === 'Enter') send(); },
       }),

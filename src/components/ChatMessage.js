@@ -25,6 +25,6 @@ export function ChatMessage({ role, content, blocks, email, attachments }) {
 }
 
 export function TypingIndicator() {
-  return h('div', { className: 'typing', 'aria-label': 'El agente está escribiendo' },
+  return h('div', { className: 'typing', 'aria-label': 'Escribiendo la respuesta' },
     h('span'), h('span'), h('span'));
 }

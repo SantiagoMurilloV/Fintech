@@ -10,9 +10,9 @@ export function AgentFab({ onClick }) {
   return h('button', {
     className: 'agent-fab',
     onClick,
-    title: 'Hablar con el agente',
-    'aria-label': 'Hablar con el agente',
+    title: 'Abrir el chat',
+    'aria-label': 'Abrir el chat',
   },
     h(LogoMark, { size: 20, strokeWidth: 2.6 }),
-    h('span', { className: 'agent-fab__label' }, 'Preguntar al agente'));
+    h('span', { className: 'agent-fab__label' }, 'Abrir chat'));
 }

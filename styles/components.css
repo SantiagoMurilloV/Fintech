@@ -1509,8 +1509,17 @@
 }
 
 .block-kpi__delta { font-size: 11.5px; }
-.block-kpi__delta.is-positive { color: var(--success-fg); }
-.block-kpi__delta.is-negative { color: var(--danger-fg); }
+.block-kpi__delta.is-positive,
+.block-kpi__delta.is-success { color: var(--success-fg); }
+.block-kpi__delta.is-negative,
+.block-kpi__delta.is-danger { color: var(--danger-fg); }
+.block-kpi__delta.is-warning { color: var(--warning-fg); }
+.block-kpi__delta.is-neutral { color: var(--text-muted); }
+
+/* A thin coloured keyline says the tile's meaning before it is read. */
+.block-kpi.tone-success { border-top: 2px solid var(--success-fg); }
+.block-kpi.tone-warning { border-top: 2px solid var(--warning-fg); }
+.block-kpi.tone-danger { border-top: 2px solid var(--danger-fg); }
 
 /* Tables */
 .block-table {
@@ -1563,13 +1572,24 @@
   border: 1px solid var(--border);
 }
 
-/* The SVG is generated with light-theme colours, so give it a light plate in
-   both themes to keep contrast predictable. */
+/* Charts drawn before the themed renderer carry light-theme colours only:
+   they keep a light plate so their dark text stays readable. */
 .block-chart__canvas {
   background: #ffffff;
   border-radius: var(--radius-sm);
   padding: var(--space-2);
 }
+
+/* Themed charts (`data-themed`) sit on the card itself; grid and labels take
+   the theme's colours, the coloured marks keep their meaning. */
+.block-chart__canvas:has(svg[data-themed]) {
+  background: transparent;
+  padding: 0;
+}
+
+.block-chart__canvas svg[data-themed] .c-grid { stroke: var(--row-line); }
+.block-chart__canvas svg[data-themed] .c-text { fill: var(--text-muted); }
+.block-chart__canvas svg[data-themed] .c-value { fill: var(--text); }
 
 .block-chart__canvas svg { display: block; width: 100%; height: auto; }
 
@@ -2576,8 +2596,67 @@
   color: var(--text);
 }
 
-/* Tables that declared themselves wide take the full analysis row. */
-.page--insights .blocks > .block-table--wide { grid-column: 1 / -1; }
+/* Tables and charts that declared themselves wide take the full analysis row. */
+.page--insights .blocks > .block-table--wide,
+.page--insights .blocks > .block-chart--wide,
+.page--insights .blocks > .block-kpis + .block-kpis { grid-column: 1 / -1; }
+
+/* ---------------------------------------------------------- analysis tabs */
+
+.analysis { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.analysis__tabs {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-solid);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.analysis__tab {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.analysis__tab:hover { color: var(--text); background: var(--hover); }
+
+.analysis__tab.is-active {
+  background: var(--nav-active-bg);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.analysis__tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.analysis__detail {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.analysis__panel { display: flex; flex-direction: column; gap: var(--space-3); }
+
+@media (max-width: 760px) {
+  .page--insights .blocks { grid-template-columns: 1fr; }
+  /* A chart keeps a legible size on a phone and scrolls sideways instead. */
+  .block-chart__canvas { overflow-x: auto; }
+  .block-chart__canvas svg { min-width: 560px; }
+  .analysis__tab { padding: 8px 12px; }
+}
 
 /* ------------------------------------------------------------------- toast
    Aviso flotante (p. ej. «entró información nueva»): visible desde cualquier
