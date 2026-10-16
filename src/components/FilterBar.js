@@ -2,7 +2,7 @@
  * Everything that narrows a table, laid out so the common cases take one click.
  *
  *   [ Buscar en cualquier campo…                 ] [ Más filtros (2) ]
- *   PERÍODO   Todo · Esta semana · Este mes · … · Rango…
+ *   PERÍODO   Todo · Esta semana · Este mes · … | 📅 Elegir fechas ▾
  *   ESTADO    Todos · Aprobada 812 · Pendiente 120 · …      (multi-select)
  *   [Cliente: ACME ✕] [Este mes ✕] Limpiar todo        1.284 órdenes · USD …
  *

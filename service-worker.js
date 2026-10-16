@@ -13,7 +13,7 @@
  *    and the API lives on a different origin anyway.
  */
 
-const VERSION = 'v32';
+const VERSION = 'v33';
 const SHELL_CACHE = `fintech-shell-${VERSION}`;
 
 // Assets that never depend on another file's version.
