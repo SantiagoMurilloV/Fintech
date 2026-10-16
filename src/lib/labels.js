@@ -30,7 +30,7 @@ export const statusTone = (code) => ORDER_STATUS_TONE[code] || 'neutral';
 
 /** Navigation entries; `id` matches the router route. `logo` renders the brand mark. */
 export const NAV_ITEMS = [
-  { id: 'agent', label: 'Agente', icon: 'logo' },
+  { id: 'agent', label: 'Chat', icon: 'logo' },
   { id: 'orders', label: 'Órdenes', icon: '⇄' },
   { id: 'expenses', label: 'Gastos', icon: '▤' },
   { id: 'reports', label: 'Análisis', icon: '◔' },
@@ -50,7 +50,7 @@ export const CHAT_SUGGESTIONS = [
 
 /** Human label of each screen, shown in the dock so the context is explicit. */
 export const VIEW_LABELS = {
-  agent: 'Agente',
+  agent: 'Chat',
   orders: 'Órdenes',
   expenses: 'Gastos',
   reports: 'Análisis',

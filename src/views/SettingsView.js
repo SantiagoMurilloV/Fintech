@@ -71,12 +71,12 @@ const SECTIONS = [
       {
         key: 'intake.orders_override', label: 'Mapeo manual de órdenes (JSON)', kind: 'text',
         placeholder: '{"amount": "total", "customer": "client_name"}',
-        hint: 'Vacío = decide el agente de ingesta. Si lo llena, su mapeo manda.',
+        hint: 'Vacío = se detecta automáticamente. Si lo llena, su mapeo manda.',
       },
       {
         key: 'intake.expenses_override', label: 'Mapeo manual de gastos (JSON)', kind: 'text',
         placeholder: '{"amount": "value", "description": "concept"}',
-        hint: 'Vacío = decide el agente de ingesta.',
+        hint: 'Vacío = se detecta automáticamente.',
       },
     ],
     probe: 'api',

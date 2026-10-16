@@ -18,6 +18,58 @@ import { BlockRenderer } from '../components/blocks/BlockRenderer.js';
 import { Button } from '../components/Button.js';
 import { PageHeader } from '../components/PageHeader.js';
 
+/** Where the screen remembers the last tab the viewer opened. */
+const TAB_KEY = 'fa.analysis.tab';
+
+function savedTab() {
+  try { return localStorage.getItem(TAB_KEY) || ''; } catch { return ''; }
+}
+
+/**
+ * Tab bar plus the open tab's blocks. Arrow keys move between tabs, as in any
+ * tab list; the choice survives a reload.
+ */
+function AnalysisTabs({ tabs }) {
+  const [chosen, setChosen] = useState(savedTab);
+  const active = tabs.find((tab) => tab.key === chosen) || tabs[0];
+
+  const open = (key) => {
+    setChosen(key);
+    try { localStorage.setItem(TAB_KEY, key); } catch { /* not kept; harmless */ }
+  };
+
+  const onKeyDown = (event) => {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+    const index = tabs.indexOf(active);
+    const next = tabs[(index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+    open(next.key);
+    event.currentTarget.querySelector(`[data-tab="${next.key}"]`)?.focus();
+  };
+
+  return h('div', { className: 'analysis' },
+    h('div', { className: 'analysis__tabs', role: 'tablist', 'aria-label': 'Secciones del análisis', onKeyDown },
+      tabs.map((tab) => h('button', {
+        key: tab.key,
+        type: 'button',
+        role: 'tab',
+        id: `analysis-tab-${tab.key}`,
+        'data-tab': tab.key,
+        'aria-selected': tab.key === active.key ? 'true' : 'false',
+        'aria-controls': 'analysis-panel',
+        tabIndex: tab.key === active.key ? '0' : '-1',
+        className: `analysis__tab ${tab.key === active.key ? 'is-active' : ''}`.trim(),
+        onClick: () => open(tab.key),
+      }, tab.label))),
+    h('section', {
+      id: 'analysis-panel',
+      className: 'analysis__panel',
+      role: 'tabpanel',
+      'aria-labelledby': `analysis-tab-${active.key}`,
+    },
+      active.detail ? h('p', { className: 'analysis__detail' }, active.detail) : null,
+      h(BlockRenderer, { key: active.key, blocks: active.blocks })));
+}
+
 /** "2026-08-05T14:32:10" -> "2026-08-05 14:32". */
 const stampLabel = (iso) => (iso ? iso.replace('T', ' ').slice(0, 16) : '');
 
@@ -92,5 +144,8 @@ export function ReportsView({ refreshKey }) {
       ? h('p', { className: 'muted' }, 'Recalculando el análisis con los datos actuales…')
       : null,
 
-    data ? h(BlockRenderer, { blocks: data.blocks }) : null);
+    // Tabs when the backend sends them; an older cached analysis is one list.
+    data?.tabs?.length
+      ? h(AnalysisTabs, { tabs: data.tabs })
+      : (data ? h(BlockRenderer, { blocks: data.blocks }) : null));
 }

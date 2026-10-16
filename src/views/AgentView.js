@@ -90,7 +90,7 @@ export function AgentView({ chat, email }) {
           value: draft,
           placeholder: 'Pregunte por sus finanzas…',
           autocomplete: 'off',
-          'aria-label': 'Mensaje para el agente',
+          'aria-label': 'Escriba su mensaje',
           onInput: (event) => setDraft(event.target.value),
           onKeyDown: (event) => { if (event.key === 'Enter') send(); },
         }),
@@ -102,5 +102,5 @@ export function AgentView({ chat, email }) {
         }, '↑')),
 
       h('p', { className: 'composer__note' },
-        'El agente calcula con los datos reales del panel. Verifique cifras críticas contra los reportes.')));
+        'El chat calcula con los datos reales del panel. Verifique cifras críticas contra los reportes.')));
 }

@@ -7,8 +7,8 @@
  */
 import { h } from '../../core/runtime.js';
 
-export function ChartBlock({ svg, title }) {
-  return h('figure', { className: 'block block-chart' },
+export function ChartBlock({ svg, title, wide }) {
+  return h('figure', { className: `block block-chart ${wide ? 'block-chart--wide' : ''}`.trim() },
     title ? h('h3', { className: 'block-chart__title' }, title) : null,
     h('div', { className: 'block-chart__canvas', dangerouslySetInnerHTML: svg }));
 }

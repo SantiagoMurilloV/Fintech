@@ -321,5 +321,5 @@ function PlanDetails({ account, isAdmin, valued, onChange }) {
         className: 'input', rows: 2, disabled: !isAdmin, value: account.definition || '',
         onInput: (event) => onChange({ definition: event.target.value }),
       }),
-      h('small', { className: 'field__hint' }, 'Qué significa esta cuenta. El agente la usará para explicar.')));
+      h('small', { className: 'field__hint' }, 'Qué significa esta cuenta. El chat la usará para explicar.')));
 }

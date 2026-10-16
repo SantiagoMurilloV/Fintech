@@ -132,7 +132,7 @@ export function LibraryView({ refreshKey }) {
   return h('div', { className: 'page' },
     h(PageHeader, {
       title: 'Reportes',
-      subtitle: 'Gráficos y documentos generados por el agente',
+      subtitle: 'Gráficos y documentos generados desde el chat',
       actions: [h(Button, { key: 'reload', onClick: reload }, 'Actualizar')],
     }),
 
@@ -156,7 +156,7 @@ export function LibraryView({ refreshKey }) {
         ? h(Card, { className: 'empty-state' },
             h('p', null, 'Todavía no hay reportes.'),
             h('p', { className: 'muted' },
-              'Pídaselos al agente: «grafica los ingresos por semana» o «genera el reporte financiero en PDF».'))
+              'Pídaselos en el chat: «grafica los ingresos por semana» o «genera el reporte financiero en PDF».'))
         : h('div', { className: 'library' },
             items.map((report) =>
               h(Card, { key: report.id, className: 'library__item' },
