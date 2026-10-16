@@ -181,6 +181,175 @@
   text-align: center;
 }
 
+/* The whole filter block: search row, chip rows, then what is active. */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* A labelled row of chips: «PERÍODO  Todo · Este mes · …». */
+.periodbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.periodbar__label {
+  flex: 0 0 64px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.periodbar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.periodbar__chips .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.chip__count {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.chip.is-active .chip__count { opacity: 0.85; }
+
+/* «Rango…» popover: two dates, a message when they do not make a range. */
+.periodbar__popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: var(--pop-left, 76px);
+  z-index: 30;
+  width: 320px;
+  padding: var(--space-4);
+  background: var(--surface-solid);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  animation: popover-in 0.14s ease-out;
+}
+
+@keyframes popover-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.periodbar__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.periodbar__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.periodbar__field .input { padding: 8px 10px; font-size: 13px; }
+
+.periodbar__problem {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--danger-fg);
+}
+
+.periodbar__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* Active filters as removable tags, and the selection total on the right. */
+.filters__active {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  min-height: 28px;
+}
+
+.filters__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 8px 4px 11px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  background: var(--nav-active-bg);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.tag-chip__x { font-size: 10px; color: var(--text-muted); }
+.tag-chip:hover .tag-chip__x { color: var(--text); }
+
+.filters__clear {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 12.5px;
+  padding: 4px 6px;
+}
+
+.selection-summary {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.selection-summary strong { color: var(--text); font-weight: 600; }
+
+@media (max-width: 760px) {
+  /* Chip rows scroll sideways instead of stacking four lines deep. */
+  .periodbar { align-items: stretch; flex-direction: column; gap: 6px; }
+  .periodbar__label { flex: none; }
+  .periodbar__chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .periodbar__popover { left: 0; right: 0; width: auto; }
+  .filters__summary { width: 100%; }
+}
+
 /* The filters dialog: two columns of fields on a desktop, one on a phone,
    where it takes the whole screen. */
 .modal--filters { width: 560px; }
@@ -243,6 +412,25 @@
   color: var(--text-muted);
 }
 
+/* A sortable header is a button that looks like the header text. */
+.th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.th-sort:hover, .th-sort.is-on { color: var(--text); }
+.th-sort__arrow { font-size: 11px; opacity: 0.45; }
+.th-sort.is-on .th-sort__arrow { opacity: 1; color: var(--accent); }
+
 .table__row {
   border-bottom: 1px solid var(--row-line);
   font-size: 13.5px;
@@ -284,6 +472,29 @@
 }
 
 .pager__link:disabled { color: var(--text-faint); }
+
+.pager { flex-wrap: wrap; justify-content: space-between; row-gap: var(--space-2); }
+.pager__summary { font-variant-numeric: tabular-nums; }
+.pager__controls { align-items: center; flex-wrap: wrap; gap: var(--space-3); }
+
+.pager__size, .pager__page {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pager__select, .pager__jump {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 3px 6px;
+  font: inherit;
+  font-size: 12.5px;
+}
+
+.pager__jump { width: 56px; text-align: center; -moz-appearance: textfield; }
+.pager__jump::-webkit-inner-spin-button { -webkit-appearance: none; }
 
 /* --------------------------------------------------------------- KpiCard */
 

@@ -150,7 +150,7 @@ async function request(path, { method = 'GET', body, headers = {}, retry = true 
  * Query string for the orders listing and its CSV export, so both always
  * describe the same rows. `filters` is {column: value} and travels as JSON.
  */
-export function orderQuery({ status, q, filters, dateFrom, dateTo, limit, offset } = {}) {
+export function orderQuery({ status, q, filters, dateFrom, dateTo, sort, limit, offset } = {}) {
   const params = new URLSearchParams();
   if (status) params.set('status', status);
   if (q) params.set('q', q);
@@ -159,6 +159,7 @@ export function orderQuery({ status, q, filters, dateFrom, dateTo, limit, offset
   if (Object.keys(chosen).length) params.set('filters', JSON.stringify(chosen));
   if (dateFrom) params.set('date_from', dateFrom);
   if (dateTo) params.set('date_to', dateTo);
+  if (sort) params.set('sort', sort);
   if (limit != null) params.set('limit', limit);
   if (offset != null) params.set('offset', offset);
   return params;
