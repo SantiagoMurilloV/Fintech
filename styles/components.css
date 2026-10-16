@@ -230,6 +230,51 @@
 
 .chip.is-active .chip__count { opacity: 0.85; }
 
+/* Thin rule between the presets and the date picker. */
+.periodbar__divider {
+  align-self: center;
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--border-strong);
+}
+
+/* The custom range: a picker, not a chip, so it reads as «choose dates». */
+.range-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px 5px 11px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 12.5px;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.range-picker svg { color: var(--accent); flex: none; }
+.range-picker:hover { border-color: var(--accent); background: var(--hover); }
+.range-picker.is-open { border-style: solid; border-color: var(--accent); }
+
+.range-picker.is-active {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--nav-active-bg);
+  font-weight: 600;
+}
+
+.range-picker__dates { display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.range-picker__sep { color: var(--text-muted); font-weight: 400; }
+.range-picker__chevron { display: inline-flex; color: var(--text-muted); transition: transform 0.15s ease; }
+.range-picker__chevron svg { color: currentColor; }
+.range-picker.is-open .range-picker__chevron { transform: rotate(180deg); }
+
+.periodbar__head { display: flex; flex-direction: column; gap: 2px; }
+.periodbar__head strong { font-size: 13.5px; color: var(--text); }
+.periodbar__head span { font-size: 12px; color: var(--text-muted); }
+
 /* «Rango…» popover: two dates, a message when they do not make a range. */
 .periodbar__popover {
   position: absolute;

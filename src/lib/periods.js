@@ -21,7 +21,7 @@ export const PERIOD_PRESETS = [
   { key: 'last_month', label: 'Mes anterior' },
   { key: 'last_30', label: 'Últimos 30 días' },
   { key: 'year', label: 'Este año' },
-  { key: 'range', label: 'Rango…' },
+  { key: 'range', label: 'Rango de fechas' },
 ];
 
 /**

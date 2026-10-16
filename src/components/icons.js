@@ -39,3 +39,15 @@ export function MagicPencilIcon({ size = 15 } = {}) {
       fill: 'currentColor', stroke: 'none',
     }));
 }
+
+/** Calendar: pick dates. */
+export function CalendarIcon({ size = 14 } = {}) {
+  return h('svg', base(size),
+    h('rect', { x: 3, y: 4.5, width: 18, height: 16.5, rx: 2.5 }),
+    h('path', { d: 'M3 9.5h18M8 2.5v4M16 2.5v4' }));
+}
+
+/** Chevron pointing down: this opens something. */
+export function ChevronDownIcon({ size = 14 } = {}) {
+  return h('svg', base(size), h('path', { d: 'M6 9l6 6 6-6' }));
+}
