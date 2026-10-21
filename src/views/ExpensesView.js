@@ -26,11 +26,11 @@ export function ExpensesView({ onOpenModal, refreshKey, onChanged }) {
   const [allRows, applyRow] = useRowEdits(data?.items || [], data);
   const originCounts = useMemo(() => {
     const counts = {};
-    for (const item of allRows) counts[item.origin || 'manual'] = (counts[item.origin || 'manual'] || 0) + 1;
+    for (const item of allRows) if (item.origin) counts[item.origin] = (counts[item.origin] || 0) + 1;
     return counts;
   }, [allRows]);
   const rows = originFilter
-    ? allRows.filter((item) => (item.origin || 'manual') === originFilter)
+    ? allRows.filter((item) => item.origin === originFilter)
     : allRows;
 
   /** Saves one field of one expense and keeps the row the backend returns. */
