@@ -7,7 +7,9 @@ import { h } from '../core/runtime.js';
 import { originLabel } from '../lib/labels.js';
 
 export function OriginTag({ origin }) {
-  const code = origin || 'manual';
+  // An older backend sends no origin: say nothing rather than call it «Manual».
+  if (!origin) return h('span', { className: 'muted' }, '—');
+  const code = origin;
   return h('span', { className: `origin-tag origin-tag--${code}`, title: `Origen: ${originLabel(code)}` },
     h('span', { className: 'origin-tag__dot', 'aria-hidden': 'true' }),
     originLabel(code));
