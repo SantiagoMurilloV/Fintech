@@ -25,6 +25,17 @@ export const IMPORT_KIND_LABELS = {
   expenses: 'gastos',
 };
 
+/** Where a record came from (the backend's `origin` code). */
+export const ORIGIN_LABELS = {
+  otc: 'Excel OTC',
+  quickbooks: 'QuickBooks',
+  api: 'Endpoint',
+  excel: 'Excel',
+  manual: 'Manual',
+};
+
+export const originLabel = (code) => ORIGIN_LABELS[code] || code;
+
 export const statusLabel = (code) => ORDER_STATUS_LABELS[code] || code;
 export const statusTone = (code) => ORDER_STATUS_TONE[code] || 'neutral';
 
