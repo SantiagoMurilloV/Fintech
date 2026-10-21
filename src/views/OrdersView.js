@@ -7,7 +7,7 @@ import { PAGE_SIZE } from '../config.js';
 import { api, download, orderQuery } from '../core/api.js';
 import { useAsync } from '../hooks/useAsync.js';
 import { useRowEdits } from '../hooks/useRowEdits.js';
-import { statusLabel, statusTone } from '../lib/labels.js';
+import { originLabel, statusLabel, statusTone } from '../lib/labels.js';
 import * as fmt from '../lib/format.js';
 import { columnLabel, editableValue, inputTypeFor } from '../lib/columns.js';
 import { Badge } from '../components/Badge.js';
@@ -15,6 +15,7 @@ import { Button } from '../components/Button.js';
 import { DataTable, TablePager } from '../components/DataTable.js';
 import { EditableCell } from '../components/EditableCell.js';
 import { FilterBar } from '../components/FilterBar.js';
+import { OriginTag } from '../components/OriginTag.js';
 import { PageHeader } from '../components/PageHeader.js';
 import { PERIOD_PRESETS, presetRange, rangeProblem } from '../lib/periods.js';
 
@@ -23,6 +24,7 @@ const SEARCH_DELAY = 300;
 
 /** Spanish names for the base columns the backend may offer as filters. */
 const BASE_FACET_LABELS = {
+  origin: 'Origen',
   status: 'Estado',
   currency: 'Moneda',
   gateway: 'Pasarela',
@@ -136,7 +138,11 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
   };
 
   /** Option text for a facet value: status codes get their Spanish label. */
-  const facetValueLabel = (facet, value) => (facet.key === 'status' ? statusLabel(value) : value);
+  const facetValueLabel = (facet, value) => {
+    if (facet.key === 'status') return statusLabel(value);
+    if (facet.key === 'origin') return data?.origins?.[value] || originLabel(value);
+    return value;
+  };
 
   const items = data?.items || [];
   const [rows, applyRow] = useRowEdits(items, data);
@@ -160,7 +166,9 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
   const source = data?.source_fields || {};
   const hidden = data?.empty_fields || [];
   const columns = useMemo(() => [
-    { key: 'id', header: sourceHeader('ID orden', source.external_id), width: '110px', render: (o) => h('span', { className: 'mono' }, o.id) },
+    { key: 'id', header: sourceHeader('ID orden', source.external_id), width: '140px', render: (o) => h('span', { className: 'mono' }, o.id) },
+    // Where the row came from, so a QuickBooks invoice never passes for an OTC trade.
+    { key: 'origin', header: 'Origen', width: '120px', render: (o) => h(OriginTag, { origin: o.origin }) },
     {
       key: 'customer', header: sourceHeader('Cliente', source.customer), width: '1.6fr',
       sort: 'customer', sortFirst: 'asc',
@@ -256,7 +264,7 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
       search: typed, onSearch: setTyped,
       facets: data?.facets || [], values: filters, onFacet: setFacet,
       labelFor: facetLabel, valueLabel: facetValueLabel,
-      quickFacet: 'status',
+      quickFacets: ['origin', 'status'],
       period, dateFrom, dateTo, onPeriod: choosePeriod,
       onClear: clearFilters,
       summary: data ? h(SelectionSummary, { summary: data.summary }) : null,
@@ -269,7 +277,7 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
           rows,
           sort,
           onSort: (next) => { setSort(next); setOffset(0); },
-          minWidth: `${920 + (data?.columns?.length || 0) * 140}px`,
+          minWidth: `${1040 + (data?.columns?.length || 0) * 140}px`,
           rowKey: (o) => o.id,
           loading,
           empty: data?.filtered ? 'Ninguna orden coincide con estos filtros.' : 'No hay órdenes todavía.',

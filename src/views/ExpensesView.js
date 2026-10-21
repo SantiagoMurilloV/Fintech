@@ -13,13 +13,25 @@ import { FileModal, previewKind } from '../components/FileModal.js';
 import { MagicPencilIcon } from '../components/icons.js';
 import { KpiCard } from '../components/KpiCard.js';
 import { PageHeader } from '../components/PageHeader.js';
+import { OriginTag } from '../components/OriginTag.js';
+import { originLabel } from '../lib/labels.js';
 
 export function ExpensesView({ onOpenModal, refreshKey, onChanged }) {
   const { data, loading, error, reload } = useAsync(() => api.listExpenses(), [refreshKey]);
   const [uploadingId, setUploadingId] = useState(null);
   const [generatingId, setGeneratingId] = useState(null);
   const [receipt, setReceipt] = useState(null);   // receipt shown in the viewer
-  const [rows, applyRow] = useRowEdits(data?.items || [], data);
+  // Where the expenses came from (QuickBooks, Excel, by hand…); '' = all.
+  const [originFilter, setOriginFilter] = useState('');
+  const [allRows, applyRow] = useRowEdits(data?.items || [], data);
+  const originCounts = useMemo(() => {
+    const counts = {};
+    for (const item of allRows) counts[item.origin || 'manual'] = (counts[item.origin || 'manual'] || 0) + 1;
+    return counts;
+  }, [allRows]);
+  const rows = originFilter
+    ? allRows.filter((item) => (item.origin || 'manual') === originFilter)
+    : allRows;
 
   /** Saves one field of one expense and keeps the row the backend returns. */
   const saveField = async (expense, field, value) => {
@@ -78,6 +90,8 @@ export function ExpensesView({ onOpenModal, refreshKey, onChanged }) {
   };
 
   const columns = useMemo(() => [
+    // Where the row came from, so a QuickBooks bill never passes for one typed here.
+    { key: 'origin', header: 'Origen', width: '120px', render: (e) => h(OriginTag, { origin: e.origin }) },
     {
       key: 'description', header: 'Concepto', width: '1.5fr',
       render: (e) => h(EditableCell, {
@@ -196,6 +210,28 @@ export function ExpensesView({ onOpenModal, refreshKey, onChanged }) {
 
     receipt ? h(FileModal, { ...receipt, onClose: () => setReceipt(null) }) : null,
 
+    // One chip per origin present, with its count: shown once there are two.
+    Object.keys(originCounts).length > 1 || originFilter
+      ? h('div', { className: 'periodbar' },
+          h('span', { className: 'periodbar__label' }, 'Origen'),
+          h('div', { className: 'periodbar__chips', role: 'group', 'aria-label': 'Origen' },
+            h('button', {
+              type: 'button',
+              className: `chip ${originFilter ? '' : 'is-active'}`.trim(),
+              'aria-pressed': originFilter ? 'false' : 'true',
+              onClick: () => setOriginFilter(''),
+            }, 'Todos', h('span', { className: 'chip__count' }, fmt.integer(allRows.length))),
+            Object.entries(originCounts).sort((a, b) => b[1] - a[1]).map(([code, count]) =>
+              h('button', {
+                key: code,
+                type: 'button',
+                className: `chip ${originFilter === code ? 'is-active' : ''}`.trim(),
+                'aria-pressed': originFilter === code ? 'true' : 'false',
+                onClick: () => setOriginFilter(originFilter === code ? '' : code),
+              }, data?.origins?.[code] || originLabel(code),
+              h('span', { className: 'chip__count' }, fmt.integer(count))))))
+      : null,
+
     error
       ? h('p', { className: 'form-error' }, error.message)
       : h(DataTable, {
@@ -205,7 +241,7 @@ export function ExpensesView({ onOpenModal, refreshKey, onChanged }) {
           loading,
           // Base columns plus room for whatever the source added: the table
           // grows with the data and the card scrolls when the screen ends.
-          minWidth: `${840 + (data?.columns?.length || 0) * 140}px`,
-          empty: 'Todavía no hay gastos registrados.',
+          minWidth: `${960 + (data?.columns?.length || 0) * 140}px`,
+          empty: originFilter ? 'Ningún gasto con este origen.' : 'Todavía no hay gastos registrados.',
         }));
 }

@@ -420,6 +420,28 @@
   .modal--filters .modal__body { flex: 1; overflow-y: auto; }
 }
 
+/* --------------------------------------------------------------- Origin
+   Where a record came from: one colour per origin, the same everywhere. */
+.origin-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px 2px 7px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.origin-tag__dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.origin-tag--otc { color: #4bc6c6; border-color: rgba(75, 198, 198, 0.35); }
+.origin-tag--quickbooks { color: #2ca01c; border-color: rgba(44, 160, 28, 0.4); }
+.origin-tag--api { color: #9b8cff; border-color: rgba(155, 140, 255, 0.35); }
+.origin-tag--excel { color: #dfb15e; border-color: rgba(223, 177, 94, 0.35); }
+.origin-tag--manual { color: var(--text-muted); }
+
 /* ------------------------------------------------------------- DataTable */
 
 .table {

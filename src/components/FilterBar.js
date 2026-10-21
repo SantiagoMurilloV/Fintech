@@ -29,23 +29,27 @@ function chosen(value) {
 export function FilterBar({
   search, onSearch,
   facets = [], values = {}, onFacet, labelFor, valueLabel = (_facet, value) => value,
-  quickFacet = null,
+  quickFacet = null, quickFacets = null,
   period = 'all', dateFrom = '', dateTo = '', onPeriod,
   onClear, summary = null,
 }) {
   const [open, setOpen] = useState(false);
 
-  const quick = facets.find((facet) => facet.key === quickFacet) || null;
-  const others = facets.filter((facet) => facet.key !== quickFacet);
+  // Facets promoted to chip rows, in the order asked; the rest go to the dialog.
+  const quickKeys = quickFacets || (quickFacet ? [quickFacet] : []);
+  const quickRows = quickKeys
+    .map((key) => facets.find((facet) => facet.key === key))
+    .filter((facet) => facet && facet.values.length);
+  const others = facets.filter((facet) => !quickKeys.includes(facet.key));
   const othersActive = others.filter((facet) => chosen(values[facet.key]).length).length;
 
-  /** Adds or removes one value of the quick facet; none chosen means all. */
-  const toggleQuick = (value) => {
-    const current = chosen(values[quick.key]);
+  /** Adds or removes one value of a chip row; none chosen means all. */
+  const toggleQuick = (facet, value) => {
+    const current = chosen(values[facet.key]);
     const next = current.includes(value)
       ? current.filter((item) => item !== value)
       : [...current, value];
-    onFacet(quick.key, next.length ? next : '');
+    onFacet(facet.key, next.length ? next : '');
   };
 
   // One removable chip per thing that narrows the rows.
@@ -101,8 +105,6 @@ export function FilterBar({
               ],
             })))));
 
-  const quickPicked = quick ? chosen(values[quick.key]) : [];
-
   return h('div', { className: 'filters' },
     h('div', { className: 'filterbar' },
       h('label', { className: 'filterbar__search' },
@@ -126,26 +128,29 @@ export function FilterBar({
 
     onPeriod ? h(PeriodBar, { preset: period, from: dateFrom, to: dateTo, onChange: onPeriod }) : null,
 
-    quick && quick.values.length ? h('div', { className: 'periodbar' },
-      h('span', { className: 'periodbar__label' }, labelFor(quick)),
-      h('div', { className: 'periodbar__chips', role: 'group', 'aria-label': labelFor(quick) },
-        h('button', {
-          type: 'button',
-          className: `chip ${quickPicked.length ? '' : 'is-active'}`.trim(),
-          'aria-pressed': quickPicked.length ? 'false' : 'true',
-          onClick: () => onFacet(quick.key, ''),
-        }, 'Todos'),
-        quick.values.map((entry) => {
-          const on = quickPicked.includes(entry.value);
-          return h('button', {
-            key: entry.value,
+    quickRows.map((facet) => {
+      const picked = chosen(values[facet.key]);
+      return h('div', { key: facet.key, className: 'periodbar' },
+        h('span', { className: 'periodbar__label' }, labelFor(facet)),
+        h('div', { className: 'periodbar__chips', role: 'group', 'aria-label': labelFor(facet) },
+          h('button', {
             type: 'button',
-            className: `chip ${on ? 'is-active' : ''}`.trim(),
-            'aria-pressed': on ? 'true' : 'false',
-            onClick: () => toggleQuick(entry.value),
-          }, valueLabel(quick, entry.value),
-          h('span', { className: 'chip__count' }, fmt.integer(entry.count)));
-        }))) : null,
+            className: `chip ${picked.length ? '' : 'is-active'}`.trim(),
+            'aria-pressed': picked.length ? 'false' : 'true',
+            onClick: () => onFacet(facet.key, ''),
+          }, 'Todos'),
+          facet.values.map((entry) => {
+            const on = picked.includes(entry.value);
+            return h('button', {
+              key: entry.value,
+              type: 'button',
+              className: `chip ${on ? 'is-active' : ''}`.trim(),
+              'aria-pressed': on ? 'true' : 'false',
+              onClick: () => toggleQuick(facet, entry.value),
+            }, valueLabel(facet, entry.value),
+            h('span', { className: 'chip__count' }, fmt.integer(entry.count)));
+          })));
+    }),
 
     active.length || summary ? h('div', { className: 'filters__active' },
       h('div', { className: 'filters__chips' },
