@@ -27,6 +27,7 @@ import { OrdersView } from './views/OrdersView.js';
 import { ExpensesView } from './views/ExpensesView.js';
 import { ReportsView } from './views/ReportsView.js';
 import { LibraryView } from './views/LibraryView.js';
+import { ImportsView } from './views/ImportsView.js';
 import { StatementView } from './views/StatementView.js';
 import { PlanView } from './views/PlanView.js';
 import { NewOrderModal } from './modals/NewOrderModal.js';
@@ -121,6 +122,7 @@ export function App() {
     expenses: () => h(ExpensesView, { onOpenModal: open, refreshKey, onChanged: refresh }),
     reports: () => h(ReportsView, { refreshKey }),
     library: () => h(LibraryView, { refreshKey }),
+    imports: () => h(ImportsView, { refreshKey }),
     statement: () => h(StatementView, { refreshKey, onOpenModal: open, isAdmin: auth.isAdmin }),
     plan: () => h(PlanView, { isAdmin: auth.isAdmin }),
     // Guarded here too: the entry is hidden for members, and so is the view.

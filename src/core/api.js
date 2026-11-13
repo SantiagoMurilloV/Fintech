@@ -279,6 +279,18 @@ export const api = {
     return request('/api/import/excel', { method: 'POST', body: form });
   },
 
+  // Import history: preview (writes nothing), confirm, discard, reconcile.
+  previewImport: (kind, file) => {
+    const form = new FormData();
+    form.append('kind', kind);
+    form.append('file', file);
+    return request('/api/imports/preview', { method: 'POST', body: form });
+  },
+  confirmImport: (id) => request(`/api/imports/${id}/confirm`, { method: 'POST' }),
+  discardImport: (id) => request(`/api/imports/${id}/discard`, { method: 'POST' }),
+  listImports: () => request('/api/imports'),
+  getImport: (id) => request(`/api/imports/${id}`),
+
   // Configuración del panel: leerla es de cualquier sesión; guardarla, del admin.
   getSettings: () => request('/api/settings'),
   saveSettings: (values) => request('/api/settings', { method: 'PUT', body: { values } }),

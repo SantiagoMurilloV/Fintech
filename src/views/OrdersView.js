@@ -5,6 +5,7 @@
 import { h, useEffect, useMemo, useState } from '../core/runtime.js';
 import { PAGE_SIZE } from '../config.js';
 import { api, download, orderQuery } from '../core/api.js';
+import { navigate } from '../core/router.js';
 import { useAsync } from '../hooks/useAsync.js';
 import { useRowEdits } from '../hooks/useRowEdits.js';
 import { originLabel, statusLabel, statusTone } from '../lib/labels.js';
@@ -254,6 +255,7 @@ export function OrdersView({ onOpenModal, refreshKey, onChanged }) {
       title: 'Órdenes',
       subtitle: `Transacciones procesadas${data ? ` · ${fmt.periodName(data.period)}` : ''}`,
       actions: [
+        h(Button, { key: 'imports', onClick: () => navigate('imports') }, 'Historial de importaciones'),
         h(Button, { key: 'import', onClick: () => onOpenModal('import', { kind: 'orders' }) }, 'Importar Excel'),
         h(Button, { key: 'csv', onClick: () => download(`/api/orders/export.csv?${orderQuery(query)}`, 'orders.csv') }, 'Exportar CSV'),
         h(Button, { key: 'new', variant: 'primary', onClick: () => onOpenModal('new-order', { catalogs: data }) }, 'Nueva orden'),

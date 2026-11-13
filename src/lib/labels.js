@@ -70,6 +70,7 @@ export const VIEW_LABELS = {
   plan: 'Plan de cuentas',
   users: 'Usuarios',
   settings: 'Configuración',
+  imports: 'Importaciones',
 };
 
 /**
