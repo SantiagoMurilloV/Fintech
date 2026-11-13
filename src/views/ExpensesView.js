@@ -1,6 +1,7 @@
 /** Expenses table, month KPIs and Cloudinary receipt uploads. */
 import { h, useMemo, useState } from '../core/runtime.js';
 import { api, withToken } from '../core/api.js';
+import { navigate } from '../core/router.js';
 import { useAsync } from '../hooks/useAsync.js';
 import { useRowEdits } from '../hooks/useRowEdits.js';
 import * as fmt from '../lib/format.js';
@@ -196,6 +197,7 @@ export function ExpensesView({ onOpenModal, refreshKey, onChanged }) {
       title: 'Gastos',
       subtitle: `Gastos operativos del período${data ? ` · ${fmt.periodName(data.period)}` : ''}`,
       actions: [
+        h(Button, { key: 'imports', onClick: () => navigate('imports') }, 'Historial de importaciones'),
         h(Button, { key: 'import', onClick: () => onOpenModal('import', { kind: 'expenses' }) }, 'Importar Excel'),
         h(Button, { key: 'new', variant: 'primary', onClick: () => onOpenModal('new-expense') }, 'Registrar gasto'),
       ],
